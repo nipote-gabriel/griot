@@ -11,7 +11,9 @@
       "Bash(npm run dev:*)",
       "Bash(npx --yes create-vite@latest temp --template react)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cd:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
