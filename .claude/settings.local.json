@@ -17,7 +17,8 @@
       "Bash(cd:*)",
       "Bash(cd:*)",
       "Bash(git push -u origin main)",
-      "Bash(brew install:*)"
+      "Bash(brew install:*)",
+      "Bash(git push origin main)"
     ],
     "deny": [],
     "ask": []

@@ -390,6 +390,11 @@ function App() {
                 <span className="player-emoji">{currentPlayer.emoji}</span>
                 <h3>{currentPlayer.nickname}</h3>
                 <p>You are the Reader for Round {game.round}</p>
+                <div className="reader-debug">
+                  <small>Reader order: {game.players.map((p, i) => 
+                    `${p.emoji}${p.nickname}${i === game.currentReader ? '👑' : ''}`
+                  ).join(' → ')}</small>
+                </div>
               </div>
               
               <button 
@@ -607,7 +612,7 @@ function App() {
             }
             
             // Check if reader and nobody got the true answer (3 points)
-            const isReader = game.currentReader === game.players.indexOf(player)
+            const isReader = game.players[game.currentReader].id === player.id
             if (isReader) {
               const anyonePickedTrue = game.selections.some(s => s.answerId === 'true')
               if (!anyonePickedTrue) {
@@ -683,7 +688,7 @@ function App() {
                   }
                   
                   // Check if reader and nobody got the true answer (3 points)
-                  const isReader = game.currentReader === game.players.indexOf(player)
+                  const isReader = game.players[game.currentReader].id === player.id
                   if (isReader) {
                     const anyonePickedTrue = game.selections.some(s => s.answerId === 'true')
                     if (!anyonePickedTrue) {
@@ -767,6 +772,11 @@ function App() {
           <div className="container">
             <h2>Select a Phrase</h2>
             <p>Round {game.round} - You are the Reader</p>
+            <div className="reader-debug">
+              <small>Reader rotation: {game.players.map((p, i) => 
+                `${p.emoji}${p.nickname}${i === game.currentReader ? '👑' : ''}`
+              ).join(' → ')}</small>
+            </div>
             
             {game.candidatePhrase && (
               <div className="phrase-card">

@@ -231,6 +231,19 @@ button:disabled {
   font-weight: 600;
 }
 
+.reader-debug {
+  margin-top: 12px;
+  padding: 8px;
+  background: #fef5e7;
+  border-radius: 6px;
+  border: 1px solid #f6ad55;
+}
+
+.reader-debug small {
+  color: #c05621;
+  font-size: 12px;
+}
+
 .divider {
   text-align: center;
   margin: 24px 0;
