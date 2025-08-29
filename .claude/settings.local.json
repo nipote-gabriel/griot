@@ -13,7 +13,11 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(cd:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(git push -u origin main)",
+      "Bash(brew install:*)"
     ],
     "deny": [],
     "ask": []

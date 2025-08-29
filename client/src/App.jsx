@@ -202,7 +202,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>Wise & Otherwise</h1>
+          <h1>Griot</h1>
           
           <div className="form-group">
             <label>Game Mode:</label>
@@ -395,26 +395,26 @@ function App() {
               <button 
                 onClick={() => {
                   const phrases = [
-                    { id: 1, firstHalf: "The cobbler's children", trueEnding: "go barefoot." },
-                    { id: 2, firstHalf: "Red sky at morning", trueEnding: "sailors take warning." },
-                    { id: 3, firstHalf: "A new broom", trueEnding: "sweeps clean." },
-                    { id: 4, firstHalf: "He who hesitates", trueEnding: "is lost." },
-                    { id: 5, firstHalf: "Charity begins", trueEnding: "at home." },
-                    { id: 6, firstHalf: "A stitch in time", trueEnding: "saves nine." },
-                    { id: 7, firstHalf: "The proof of the pudding", trueEnding: "is in the eating." },
-                    { id: 8, firstHalf: "A watched pot", trueEnding: "never boils." },
-                    { id: 9, firstHalf: "Many hands make", trueEnding: "light work." },
-                    { id: 10, firstHalf: "The exception proves", trueEnding: "the rule." },
-                    { id: 11, firstHalf: "Empty vessels", trueEnding: "make the most sound." },
-                    { id: 12, firstHalf: "A rolling stone", trueEnding: "gathers no moss." },
-                    { id: 13, firstHalf: "Spare the rod", trueEnding: "spoil the child." },
-                    { id: 14, firstHalf: "A house divided", trueEnding: "cannot stand." },
-                    { id: 15, firstHalf: "Pride goeth before", trueEnding: "a fall." },
-                    { id: 16, firstHalf: "The road to hell", trueEnding: "is paved with good intentions." },
-                    { id: 17, firstHalf: "A penny for", trueEnding: "your thoughts." },
-                    { id: 18, firstHalf: "Curiosity killed", trueEnding: "the cat." },
-                    { id: 19, firstHalf: "Don't look a gift horse", trueEnding: "in the mouth." },
-                    { id: 20, firstHalf: "Necessity is", trueEnding: "the mother of invention." }
+                    { id: 1, firstHalf: "The owl of Minerva", trueEnding: "flies only at dusk." },
+                    { id: 2, firstHalf: "A cat may look", trueEnding: "at a king." },
+                    { id: 3, firstHalf: "The mills of God", trueEnding: "grind slowly but exceedingly fine." },
+                    { id: 4, firstHalf: "Fish and guests", trueEnding: "stink after three days." },
+                    { id: 5, firstHalf: "When the moon is full", trueEnding: "the wolves howl loudest." },
+                    { id: 6, firstHalf: "A whistling woman and a crowing hen", trueEnding: "bring luck to neither gods nor men." },
+                    { id: 7, firstHalf: "The darkest hour", trueEnding: "is just before dawn." },
+                    { id: 8, firstHalf: "A hedge between", trueEnding: "keeps friendship green." },
+                    { id: 9, firstHalf: "The tongue that brings healing", trueEnding: "is a tree of life." },
+                    { id: 10, firstHalf: "A soft answer", trueEnding: "turns away wrath." },
+                    { id: 11, firstHalf: "The sleep of a laboring man", trueEnding: "is sweet." },
+                    { id: 12, firstHalf: "A good name", trueEnding: "is rather to be chosen than great riches." },
+                    { id: 13, firstHalf: "The race is not", trueEnding: "to the swift." },
+                    { id: 14, firstHalf: "Cast your bread upon the waters", trueEnding: "and it will return after many days." },
+                    { id: 15, firstHalf: "A threefold cord", trueEnding: "is not quickly broken." },
+                    { id: 16, firstHalf: "Iron sharpens iron", trueEnding: "as one man sharpens another." },
+                    { id: 17, firstHalf: "The heart of man", trueEnding: "plans his way." },
+                    { id: 18, firstHalf: "A man's heart", trueEnding: "deviseth his way." },
+                    { id: 19, firstHalf: "The lot is cast into the lap", trueEnding: "but its every decision is from the Lord." },
+                    { id: 20, firstHalf: "A gentle tongue", trueEnding: "is a tree of life." }
                   ]
                   const availablePhrases = phrases.filter(p => !game.usedPhraseIds.includes(p.id))
                   const randomPhrase = availablePhrases[Math.floor(Math.random() * availablePhrases.length)]
@@ -588,6 +588,40 @@ function App() {
         )
       } else {
         // All votes collected, show results
+        // Calculate scores only once per round
+        if (!game.scoresCalculated) {
+          game.players.forEach(player => {
+            let points = 0
+            
+            // Check if picked true answer (2 points)
+            const pickedTrue = game.selections.some(s => s.playerId === player.id && s.answerId === 'true')
+            if (pickedTrue) {
+              points += 2
+            }
+            
+            // Check votes on their bluff (2 points each)
+            const theirSubmission = game.submissions.find(s => s.playerId === player.id)
+            if (theirSubmission) {
+              const votes = game.selections.filter(s => s.answerId === theirSubmission.id).length
+              points += votes * 2
+            }
+            
+            // Check if reader and nobody got the true answer (3 points)
+            const isReader = game.currentReader === game.players.indexOf(player)
+            if (isReader) {
+              const anyonePickedTrue = game.selections.some(s => s.answerId === 'true')
+              if (!anyonePickedTrue) {
+                points += 3
+              }
+            }
+            
+            // Add points to player score
+            player.score += points
+          })
+          
+          game.scoresCalculated = true
+        }
+        
         return (
           <div className="app">
             <div className="container">
@@ -659,9 +693,6 @@ function App() {
                   }
                   
                   if (points > 0) {
-                    // Update player score
-                    player.score += points
-                    
                     return (
                       <div key={player.id} className="score-item">
                         <span>{player.emoji} {player.nickname}</span>
@@ -711,7 +742,8 @@ function App() {
                       submissions: [],
                       orderedAnswers: [],
                       selections: [],
-                      currentChooser: nextReaderIndex === 0 ? 1 : 0  // First non-reader
+                      currentChooser: nextReaderIndex === 0 ? 1 : 0,  // First non-reader
+                      scoresCalculated: false  // Reset for next round
                     })
                   }} className="primary-btn">
                     Next Round
