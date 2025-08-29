@@ -18,7 +18,9 @@
       "Bash(cd:*)",
       "Bash(git push -u origin main)",
       "Bash(brew install:*)",
-      "Bash(git push origin main)"
+      "Bash(git push origin main)",
+      "Bash(vercel:*)",
+      "Bash(sudo chown:*)"
     ],
     "deny": [],
     "ask": []

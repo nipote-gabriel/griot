@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws'
-import { getRandomPhrase } from './phrases.js'
+import { getRandomSaying } from './phrases.js'
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 const wss = new WebSocketServer({ port: PORT })
 
 const lobbies = new Map()
@@ -54,15 +54,15 @@ function initializeGame(lobby) {
     players: seatedPlayers.map(p => ({ ...p, score: 0 })),
     round: 1,
     currentReader: seatedPlayers[0].id,
-    phase: 'phrase_selection',
-    candidatePhrase: null,
-    selectedPhrase: null,
+    phase: 'saying_selection',
+    candidateSaying: null,
+    selectedSaying: null,
     submissions: [],
     orderedAnswers: [],
     selections: [],
     currentChooser: null,
     phaseStartTime: Date.now(),
-    usedPhraseIds: [],
+    usedSayingIds: [],
     revealResults: [],
     roundScoring: [],
     winner: null,
@@ -73,15 +73,15 @@ function initializeGame(lobby) {
   return game
 }
 
-function getNextPhrase(game) {
-  return getRandomPhrase(game.usedPhraseIds)
+function getNextSaying(game) {
+  return getRandomSaying(game.usedSayingIds)
 }
 
 function advanceToNextPhase(game) {
   const { phase, lobbyCode } = game
   
   switch (phase) {
-    case 'phrase_selection':
+    case 'saying_selection':
       game.phase = game.mode === 'Local' ? 'reading' : 'writing'
       game.phaseStartTime = Date.now()
       break
@@ -253,9 +253,9 @@ function advanceToNextRound(game) {
   const currentReaderIndex = game.players.findIndex(p => p.id === game.currentReader)
   const nextReaderIndex = (currentReaderIndex + 1) % game.players.length
   game.currentReader = game.players[nextReaderIndex].id
-  game.phase = 'phrase_selection'
-  game.candidatePhrase = null
-  game.selectedPhrase = null
+  game.phase = 'saying_selection'
+  game.candidateSaying = null
+  game.selectedSaying = null
   game.submissions = []
   game.orderedAnswers = []
   game.selections = []
@@ -397,11 +397,11 @@ function handleMessage(ws, data) {
     case 'kick_player':
       handleKickPlayer(ws, data)
       break
-    case 'next_phrase':
-      handleNextPhrase(ws, data)
+    case 'next_saying':
+      handleNextSaying(ws, data)
       break
-    case 'select_phrase':
-      handleSelectPhrase(ws, data)
+    case 'select_saying':
+      handleSelectSaying(ws, data)
       break
     case 'open_round':
       handleOpenRound(ws, data)
@@ -527,7 +527,7 @@ function handleStartGame(ws, data) {
   }
   
   const game = initializeGame(lobby)
-  game.candidatePhrase = getNextPhrase(game)
+  game.candidateSaying = getNextSaying(game)
   game.mode = lobby.mode
   
   broadcast(lobby.code, {
@@ -564,12 +564,12 @@ function handleKickPlayer(ws, data) {
   })
 }
 
-function handleNextPhrase(ws, data) {
+function handleNextSaying(ws, data) {
   const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
   if (!client) return
   
   const [playerId] = client
-  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'phrase_selection')
+  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'saying_selection')
   
   if (!game) {
     ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
@@ -580,7 +580,7 @@ function handleNextPhrase(ws, data) {
     game.submissions = []
   }
   
-  game.candidatePhrase = getNextPhrase(game)
+  game.candidateSaying = getNextSaying(game)
   
   broadcast(game.lobbyCode, {
     type: 'game_updated',
@@ -588,22 +588,22 @@ function handleNextPhrase(ws, data) {
   })
 }
 
-function handleSelectPhrase(ws, data) {
-  const { phraseId } = data
+function handleSelectSaying(ws, data) {
+  const { sayingId } = data
   const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
   if (!client) return
   
   const [playerId] = client
-  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'phrase_selection')
+  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'saying_selection')
   
   if (!game) {
     ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
     return
   }
   
-  game.selectedPhrase = game.candidatePhrase
-  game.usedPhraseIds.push(phraseId)
-  game.candidatePhrase = null
+  game.selectedSaying = game.candidateSaying
+  game.usedSayingIds.push(sayingId)
+  game.candidateSaying = null
   
   advanceToNextPhase(game)
 }
@@ -732,7 +732,7 @@ function handleNextRound(ws, data) {
   }
   
   advanceToNextRound(game)
-  game.candidatePhrase = getNextPhrase(game)
+  game.candidateSaying = getNextSaying(game)
   
   broadcast(game.lobbyCode, {
     type: 'game_updated',

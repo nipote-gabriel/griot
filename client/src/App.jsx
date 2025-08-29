@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
-import { PHRASES } from '../../server/phrases.js'
+import { SAYINGS } from './phrases.js'
 
 const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧝‍♀️', '🧌', '🧞‍♂️', '🧞‍♀️', '🐉']
 
@@ -18,8 +18,8 @@ function App() {
   const [gameMode, setGameMode] = useState('online') // 'online' or 'local'
   const [localPlayers, setLocalPlayers] = useState([])
   const [currentLocalPlayer, setCurrentLocalPlayer] = useState(0)
-  const [phraseOptions, setPhraseOptions] = useState([])
-  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
+  const [sayingOptions, setSayingOptions] = useState([])
+  const [currentSayingIndex, setCurrentSayingIndex] = useState(0)
   const [answerOrder, setAnswerOrder] = useState([])
   const [draggedIndex, setDraggedIndex] = useState(null)
   const [showSubmissionConfirm, setShowSubmissionConfirm] = useState(false)
@@ -115,12 +115,12 @@ function App() {
     send({ type: 'start_game' })
   }
 
-  const selectPhrase = (phraseId) => {
-    send({ type: 'select_phrase', phraseId })
+  const selectSaying = (sayingId) => {
+    send({ type: 'select_saying', sayingId })
   }
 
-  const requestNextPhrase = () => {
-    send({ type: 'next_phrase' })
+  const requestNextSaying = () => {
+    send({ type: 'next_saying' })
   }
 
   const openRound = () => {
@@ -193,8 +193,8 @@ function App() {
       players: [...localPlayers],
       round: 1,
       currentReader: 0,
-      phase: 'phrase_selection',
-      selectedPhrase: null,
+      phase: 'saying_selection',
+      selectedSaying: null,
       submissions: [],
       orderedAnswers: [],
       currentChooser: localPlayers.length > 1 ? 1 : 0, // First non-reader
@@ -202,7 +202,7 @@ function App() {
       revealResults: [],
       roundScoring: [],
       winner: null,
-      usedPhraseIds: []
+      usedSayingIds: []
     })
   }
 
@@ -402,7 +402,7 @@ function App() {
   if (gameState === 'local-game' && game) {
     const currentPlayer = game.players[game.currentReader]
     
-    if (game.phase === 'phrase_selection') {
+    if (game.phase === 'saying_selection') {
       return (
         <div className="app">
           <div className="container">
@@ -421,11 +421,11 @@ function App() {
               
               <button 
                 onClick={() => {
-                  // Get 5 random available phrases for the reader to choose from
-                  const availablePhrases = PHRASES.filter(p => !game.usedPhraseIds.includes(p.id))
+                  // Get 5 random available sayings for the reader to choose from
+                  const availableSayings = SAYINGS.filter(p => !game.usedSayingIds.includes(p.id))
                   
                   // Truly randomize using Fisher-Yates shuffle
-                  const shuffled = [...availablePhrases]
+                  const shuffled = [...availableSayings]
                   for (let i = shuffled.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -433,13 +433,13 @@ function App() {
                   
                   const fiveOptions = shuffled.slice(0, 5)
                   
-                  setPhraseOptions(fiveOptions)
-                  setCurrentPhraseIndex(0)
-                  setGame({...game, phase: 'phrase_browsing'})
+                  setSayingOptions(fiveOptions)
+                  setCurrentSayingIndex(0)
+                  setGame({...game, phase: 'saying_browsing'})
                 }}
                 className="primary-btn"
               >
-                Browse & Select Phrase
+                Browse & Select Saying
               </button>
             </div>
           </div>
@@ -447,73 +447,73 @@ function App() {
       )
     }
     
-    if (game.phase === 'phrase_browsing') {
-      const currentPhrase = phraseOptions[currentPhraseIndex]
+    if (game.phase === 'saying_browsing') {
+      const currentSaying = sayingOptions[currentSayingIndex]
       return (
         <div className="app">
           <div className="container">
-            <h2>Choose Your Phrase</h2>
+            <h2>Choose Your Saying</h2>
             <div className="pass-device">
               <div className="current-player">
                 <span className="player-emoji">{currentPlayer.emoji}</span>
                 <h3>{currentPlayer.nickname}</h3>
-                <p>Browse through 5 phrases and pick your favorite</p>
+                <p>Browse through 5 sayings and pick your favorite</p>
               </div>
               
-              <div className="phrase-browser">
-                <div className="phrase-counter">
-                  <span>Phrase {currentPhraseIndex + 1} of {phraseOptions.length}</span>
+              <div className="saying-browser">
+                <div className="saying-counter">
+                  <span>Saying {currentSayingIndex + 1} of {sayingOptions.length}</span>
                 </div>
                 
-                <div className="phrase-card">
+                <div className="saying-card">
                   <button 
                     onClick={() => {
-                      // Mark current phrase as used and replace with new one
-                      const newUsedIds = [...game.usedPhraseIds, currentPhrase.id]
+                      // Mark current saying as used and replace with new one
+                      const newUsedIds = [...game.usedSayingIds, currentSaying.id]
                       
-                      // Get available phrases excluding already used and currently selected ones
-                      const currentlySelected = phraseOptions.map(p => p.id)
-                      const availablePhrases = PHRASES.filter(p => 
+                      // Get available sayings excluding already used and currently selected ones
+                      const currentlySelected = sayingOptions.map(p => p.id)
+                      const availableSayings = SAYINGS.filter(p => 
                         !newUsedIds.includes(p.id) && !currentlySelected.includes(p.id)
                       )
                       
-                      if (availablePhrases.length === 0) {
-                        setMessage("All available phrases have been used. Please start a new game.")
+                      if (availableSayings.length === 0) {
+                        setMessage("All available sayings have been used. Please start a new game.")
                         return
                       }
                       
-                      // Get a random replacement phrase
-                      const randomIndex = Math.floor(Math.random() * availablePhrases.length)
-                      const replacementPhrase = availablePhrases[randomIndex]
+                      // Get a random replacement saying
+                      const randomIndex = Math.floor(Math.random() * availableSayings.length)
+                      const replacementSaying = availableSayings[randomIndex]
                       
-                      // Replace the current phrase with the new one
-                      const newOptions = [...phraseOptions]
-                      newOptions[currentPhraseIndex] = replacementPhrase
+                      // Replace the current saying with the new one
+                      const newOptions = [...sayingOptions]
+                      newOptions[currentSayingIndex] = replacementSaying
                       
-                      setPhraseOptions(newOptions)
-                      setGame({...game, usedPhraseIds: newUsedIds})
+                      setSayingOptions(newOptions)
+                      setGame({...game, usedSayingIds: newUsedIds})
                     }}
                     className="mark-used-btn"
-                    title="Mark this phrase as already known"
+                    title="Mark this saying as already known"
                   >
                     Used
                   </button>
                   
-                  <p className="phrase-origin">There is an old {currentPhrase.origin || 'ancient'} phrase:</p>
-                  <p className="first-half">{currentPhrase.firstHalf}</p>
-                  <p className="true-ending">...{currentPhrase.trueEnding}</p>
+                  <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
+                  <p className="first-half">{currentSaying.firstHalf}</p>
+                  <p className="true-ending">...{currentSaying.trueEnding}</p>
                 </div>
                 
-                <div className="phrase-navigation">
+                <div className="saying-navigation">
                   <button 
-                    onClick={() => setCurrentPhraseIndex((currentPhraseIndex - 1 + phraseOptions.length) % phraseOptions.length)}
+                    onClick={() => setCurrentSayingIndex((currentSayingIndex - 1 + sayingOptions.length) % sayingOptions.length)}
                     className="nav-btn"
                   >
                     ← Previous
                   </button>
                   
                   <button 
-                    onClick={() => setCurrentPhraseIndex((currentPhraseIndex + 1) % phraseOptions.length)}
+                    onClick={() => setCurrentSayingIndex((currentSayingIndex + 1) % sayingOptions.length)}
                     className="nav-btn"
                   >
                     Next →
@@ -524,14 +524,14 @@ function App() {
                   onClick={() => {
                     setGame({
                       ...game, 
-                      selectedPhrase: currentPhrase, 
+                      selectedSaying: currentSaying, 
                       phase: 'writing', 
-                      usedPhraseIds: [...game.usedPhraseIds, currentPhrase.id]
+                      usedSayingIds: [...game.usedSayingIds, currentSaying.id]
                     })
                   }}
                   className="primary-btn"
                 >
-                  Select This Phrase
+                  Select This Saying
                 </button>
               </div>
             </div>
@@ -557,8 +557,8 @@ function App() {
                   <p>Write your ending</p>
                 </div>
                 
-                <div className="phrase-card">
-                  <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+                <div className="saying-card">
+                  <p className="first-half">{game.selectedSaying.firstHalf}</p>
                   <p className="continuation">...</p>
                 </div>
 
@@ -582,7 +582,7 @@ function App() {
                   ) : (
                     <div className="submission-preview">
                       <p><strong>Your answer:</strong> "{submission.trim()}"</p>
-                      <div className="phrase-actions">
+                      <div className="saying-actions">
                         <button 
                           onClick={() => setShowSubmissionConfirm(false)}
                           className="nav-btn"
@@ -637,7 +637,7 @@ function App() {
                     
                     const trueAnswer = {
                       id: 'true',
-                      ending: game.selectedPhrase.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
+                      ending: game.selectedSaying.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
                       isTrue: true
                     }
                     
@@ -674,8 +674,8 @@ function App() {
                 <p>Drag answers up and down to reorder them</p>
               </div>
               
-              <div className="phrase-card">
-                <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+              <div className="saying-card">
+                <p className="first-half">{game.selectedSaying.firstHalf}</p>
                 <p className="continuation">...</p>
               </div>
 
@@ -747,8 +747,8 @@ function App() {
                   <p>Pick the TRUE answer</p>
                 </div>
                 
-                <div className="phrase-card">
-                  <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+                <div className="saying-card">
+                  <p className="first-half">{game.selectedSaying.firstHalf}</p>
                 </div>
                 
                 <div className="answers-list">
@@ -769,8 +769,8 @@ function App() {
 
                 {showVoteConfirm && selectedAnswer && (
                   <div className="submission-preview">
-                    <p><strong>You selected:</strong> "{game.selectedPhrase.firstHalf} {selectedAnswer.ending}"</p>
-                    <div className="phrase-actions">
+                    <p><strong>You selected:</strong> "{game.selectedSaying.firstHalf} {selectedAnswer.ending}"</p>
+                    <div className="saying-actions">
                       <button 
                         onClick={() => {
                           setShowVoteConfirm(false)
@@ -861,9 +861,9 @@ function App() {
             <div className="container">
               <h2>Results - Round {game.round}</h2>
               
-              <div className="phrase-card">
-                <p className="first-half">{game.selectedPhrase.firstHalf}</p>
-                <p className="true-ending highlight">...{game.selectedPhrase.trueEnding}</p>
+              <div className="saying-card">
+                <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                <p className="true-ending highlight">...{game.selectedSaying.trueEnding}</p>
               </div>
 
               <div className="reveal-results">
@@ -978,8 +978,8 @@ function App() {
                       ...game,
                       round: game.round + 1,
                       currentReader: nextReaderIndex,
-                      phase: 'phrase_selection',
-                      selectedPhrase: null,
+                      phase: 'saying_selection',
+                      selectedSaying: null,
                       submissions: [],
                       orderedAnswers: [],
                       selections: [],
@@ -1002,11 +1002,11 @@ function App() {
     const isReader = player?.id === game.currentReader
     const currentPhase = game.phase
 
-    if (currentPhase === 'phrase_selection' && isReader) {
+    if (currentPhase === 'saying_selection' && isReader) {
       return (
         <div className="app">
           <div className="container">
-            <h2>Select a Phrase</h2>
+            <h2>Select a Saying</h2>
             <p>Round {game.round} - You are the Reader</p>
             <div className="reader-debug">
               <small>Reader rotation: {game.players.map((p, i) => 
@@ -1014,24 +1014,24 @@ function App() {
               ).join(' → ')}</small>
             </div>
             
-            {game.candidatePhrase && (
-              <div className="phrase-card">
+            {game.candidateSaying && (
+              <div className="saying-card">
                 <button 
-                  onClick={requestNextPhrase}
+                  onClick={requestNextSaying}
                   className="mark-used-btn"
-                  title="Mark this phrase as already known"
+                  title="Mark this saying as already known"
                 >
                   Used
                 </button>
                 
-                <p className="phrase-origin">There is an old {game.candidatePhrase.origin || 'ancient'} phrase:</p>
-                <p className="first-half">{game.candidatePhrase.firstHalf}</p>
-                <p className="true-ending">...{game.candidatePhrase.trueEnding}</p>
+                <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
+                <p className="first-half">{game.candidateSaying.firstHalf}</p>
+                <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
                 
-                <div className="phrase-actions">
-                  <button onClick={requestNextPhrase}>Next Phrase</button>
-                  <button onClick={() => selectPhrase(game.candidatePhrase.id)} className="primary-btn">
-                    Select This Phrase
+                <div className="saying-actions">
+                  <button onClick={requestNextSaying}>Next Saying</button>
+                  <button onClick={() => selectSaying(game.candidateSaying.id)} className="primary-btn">
+                    Select This Saying
                   </button>
                 </div>
               </div>
@@ -1040,7 +1040,7 @@ function App() {
             {game.submissions.length > 0 && (
               <div className="submissions-info">
                 <p>⚠️ {game.submissions.length} submission(s) received</p>
-                <p>Switching phrases will clear all submissions!</p>
+                <p>Switching sayings will clear all submissions!</p>
               </div>
             )}
           </div>
@@ -1048,7 +1048,7 @@ function App() {
       )
     }
 
-    if (currentPhase === 'phrase_selection' && !isReader) {
+    if (currentPhase === 'saying_selection' && !isReader) {
       return (
         <div className="app">
           <div className="container">
@@ -1057,7 +1057,7 @@ function App() {
             <p className="reader-name">
               {game.players.find(p => p.id === game.currentReader)?.emoji} 
               {' '}
-              {game.players.find(p => p.id === game.currentReader)?.nickname} is selecting a phrase...
+              {game.players.find(p => p.id === game.currentReader)?.nickname} is selecting a saying...
             </p>
           </div>
         </div>
@@ -1071,12 +1071,12 @@ function App() {
             <h2>Read Aloud</h2>
             <p>Round {game.round}</p>
             
-            <div className="phrase-card">
-              <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+            <div className="saying-card">
+              <p className="first-half">{game.selectedSaying.firstHalf}</p>
             </div>
 
             <div className="reading-instructions">
-              <p>Read the phrase aloud to all players, then open the round for writing.</p>
+              <p>Read the saying aloud to all players, then open the round for writing.</p>
             </div>
 
             <button onClick={openRound} className="primary-btn">
@@ -1093,7 +1093,7 @@ function App() {
           <div className="container">
             <h2>Reader is Reading...</h2>
             <p>Round {game.round}</p>
-            <p>Listen carefully to the phrase!</p>
+            <p>Listen carefully to the saying!</p>
           </div>
         </div>
       )
@@ -1107,8 +1107,8 @@ function App() {
               <h2>Writers are Writing</h2>
               <p>Round {game.round}</p>
               
-              <div className="phrase-card">
-                <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+              <div className="saying-card">
+                <p className="first-half">{game.selectedSaying.firstHalf}</p>
               </div>
 
               <div className="submissions-status">
@@ -1134,8 +1134,8 @@ function App() {
               <h2>Write Your Ending</h2>
               <p>Round {game.round}</p>
               
-              <div className="phrase-card">
-                <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+              <div className="saying-card">
+                <p className="first-half">{game.selectedSaying.firstHalf}</p>
                 <p className="continuation">...</p>
               </div>
 
@@ -1163,7 +1163,7 @@ function App() {
                 ) : (
                   <div className="submission-preview">
                     <p><strong>Your answer:</strong> "{submission.trim()}"</p>
-                    <div className="phrase-actions">
+                    <div className="saying-actions">
                       <button 
                         onClick={() => setShowSubmissionConfirm(false)}
                         className="nav-btn"
@@ -1198,7 +1198,7 @@ function App() {
     if (currentPhase === 'reorder' && isReader) {
       const allAnswers = [...game.submissions, { 
         id: 'true', 
-        ending: game.selectedPhrase.trueEnding,
+        ending: game.selectedSaying.trueEnding,
         isTrue: true 
       }]
       
@@ -1300,8 +1300,8 @@ function App() {
 
               {showVoteConfirm && selectedAnswer && (
                 <div className="submission-preview">
-                  <p><strong>You selected:</strong> "{game.selectedPhrase.firstHalf} {selectedAnswer.ending}"</p>
-                  <div className="phrase-actions">
+                  <p><strong>You selected:</strong> "{game.selectedSaying.firstHalf} {selectedAnswer.ending}"</p>
+                  <div className="saying-actions">
                     <button 
                       onClick={() => {
                         setShowVoteConfirm(false)
@@ -1365,9 +1365,9 @@ function App() {
             <h2>Results</h2>
             <p>Round {game.round}</p>
             
-            <div className="phrase-card">
-              <p className="first-half">{game.selectedPhrase.firstHalf}</p>
-              <p className="true-ending highlight">...{game.selectedPhrase.trueEnding}</p>
+            <div className="saying-card">
+              <p className="first-half">{game.selectedSaying.firstHalf}</p>
+              <p className="true-ending highlight">...{game.selectedSaying.trueEnding}</p>
             </div>
 
             <div className="reveal-results">
