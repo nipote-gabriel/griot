@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { PHRASES } from '../../server/phrases.js'
 
-const EMOJI_AVATARS = ['😀', '😊', '🤠', '🦄', '🐸', '🐧', '🍀', '⭐', '🎯', '🎪', '🚀', '🎸']
+const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧝‍♀️', '🧌', '🧞‍♂️', '🧞‍♀️', '🐉']
 
 function App() {
   const [ws, setWs] = useState(null)
@@ -210,7 +210,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>Griot</h1>
+          <h1>Soothsayer</h1>
           
           <div className="form-group">
             <label>Game Mode:</label>
