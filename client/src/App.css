@@ -374,6 +374,7 @@ button:disabled {
   padding: 20px;
   margin: 20px 0;
   text-align: center;
+  position: relative;
 }
 
 .phrase-origin {
@@ -385,16 +386,19 @@ button:disabled {
 }
 
 .mark-used-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: #ed8936;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 16px;
   transition: background 0.2s ease;
+  z-index: 10;
 }
 
 .mark-used-btn:hover {

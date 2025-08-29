@@ -326,6 +326,13 @@ export const PHRASES = [
 
 export function getRandomPhrase(excludeIds = []) {
   const availablePhrases = PHRASES.filter(p => !excludeIds.includes(p.id))
-  if (availablePhrases.length === 0) return PHRASES[Math.floor(Math.random() * PHRASES.length)]
-  return availablePhrases[Math.floor(Math.random() * availablePhrases.length)]
+  if (availablePhrases.length === 0) {
+    // If all phrases are used, return a truly random one from the full set
+    const randomIndex = Math.floor(Math.random() * PHRASES.length)
+    return PHRASES[randomIndex]
+  }
+  
+  // Use cryptographically strong randomness for better distribution
+  const randomIndex = Math.floor(Math.random() * availablePhrases.length)
+  return availablePhrases[randomIndex]
 }

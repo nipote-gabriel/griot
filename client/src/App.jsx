@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
+import { PHRASES } from '../../server/phrases.js'
 
 const EMOJI_AVATARS = ['😀', '😊', '🤠', '🦄', '🐸', '🐧', '🍀', '⭐', '🎯', '🎪', '🚀', '🎸']
 
@@ -406,32 +407,16 @@ function App() {
               
               <button 
                 onClick={() => {
-                  const phrases = [
-                    { id: 1, firstHalf: "The owl of Minerva", trueEnding: "flies only at dusk." },
-                    { id: 2, firstHalf: "A cat may look", trueEnding: "at a king." },
-                    { id: 3, firstHalf: "The mills of God", trueEnding: "grind slowly but exceedingly fine." },
-                    { id: 4, firstHalf: "Fish and guests", trueEnding: "stink after three days." },
-                    { id: 5, firstHalf: "When the moon is full", trueEnding: "the wolves howl loudest." },
-                    { id: 6, firstHalf: "A whistling woman and a crowing hen", trueEnding: "bring luck to neither gods nor men." },
-                    { id: 7, firstHalf: "The darkest hour", trueEnding: "is just before dawn." },
-                    { id: 8, firstHalf: "A hedge between", trueEnding: "keeps friendship green." },
-                    { id: 9, firstHalf: "The tongue that brings healing", trueEnding: "is a tree of life." },
-                    { id: 10, firstHalf: "A soft answer", trueEnding: "turns away wrath." },
-                    { id: 11, firstHalf: "The sleep of a laboring man", trueEnding: "is sweet." },
-                    { id: 12, firstHalf: "A good name", trueEnding: "is rather to be chosen than great riches." },
-                    { id: 13, firstHalf: "The race is not", trueEnding: "to the swift." },
-                    { id: 14, firstHalf: "Cast your bread upon the waters", trueEnding: "and it will return after many days." },
-                    { id: 15, firstHalf: "A threefold cord", trueEnding: "is not quickly broken." },
-                    { id: 16, firstHalf: "Iron sharpens iron", trueEnding: "as one man sharpens another." },
-                    { id: 17, firstHalf: "The heart of man", trueEnding: "plans his way." },
-                    { id: 18, firstHalf: "A man's heart", trueEnding: "deviseth his way." },
-                    { id: 19, firstHalf: "The lot is cast into the lap", trueEnding: "but its every decision is from the Lord." },
-                    { id: 20, firstHalf: "A gentle tongue", trueEnding: "is a tree of life." }
-                  ]
-                  
                   // Get 5 random available phrases for the reader to choose from
-                  const availablePhrases = phrases.filter(p => !game.usedPhraseIds.includes(p.id))
-                  const shuffled = [...availablePhrases].sort(() => Math.random() - 0.5)
+                  const availablePhrases = PHRASES.filter(p => !game.usedPhraseIds.includes(p.id))
+                  
+                  // Truly randomize using Fisher-Yates shuffle
+                  const shuffled = [...availablePhrases]
+                  for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                  }
+                  
                   const fiveOptions = shuffled.slice(0, 5)
                   
                   setPhraseOptions(fiveOptions)
@@ -467,10 +452,6 @@ function App() {
                 </div>
                 
                 <div className="phrase-card">
-                  <p className="phrase-origin">There is an old {currentPhrase.origin} phrase:</p>
-                  <p className="first-half">{currentPhrase.firstHalf}</p>
-                  <p className="true-ending">...{currentPhrase.trueEnding}</p>
-                  
                   <button 
                     onClick={() => {
                       // Mark this phrase as used and get a new one
@@ -490,9 +471,14 @@ function App() {
                       setGame({...game, usedPhraseIds: newUsedIds})
                     }}
                     className="mark-used-btn"
+                    title="Mark this phrase as already known"
                   >
-                    Mark Already Used
+                    Used
                   </button>
+                  
+                  <p className="phrase-origin">There is an old {currentPhrase.origin || 'ancient'} phrase:</p>
+                  <p className="first-half">{currentPhrase.firstHalf}</p>
+                  <p className="true-ending">...{currentPhrase.trueEnding}</p>
                 </div>
                 
                 <div className="phrase-navigation">
@@ -1007,7 +993,15 @@ function App() {
             
             {game.candidatePhrase && (
               <div className="phrase-card">
-                <p className="phrase-origin">There is an old {game.candidatePhrase.origin} phrase:</p>
+                <button 
+                  onClick={requestNextPhrase}
+                  className="mark-used-btn"
+                  title="Mark this phrase as already known"
+                >
+                  Used
+                </button>
+                
+                <p className="phrase-origin">There is an old {game.candidatePhrase.origin || 'ancient'} phrase:</p>
                 <p className="first-half">{game.candidatePhrase.firstHalf}</p>
                 <p className="true-ending">...{game.candidatePhrase.trueEnding}</p>
                 
@@ -1017,13 +1011,6 @@ function App() {
                     Select This Phrase
                   </button>
                 </div>
-                
-                <button 
-                  onClick={requestNextPhrase}
-                  className="mark-used-btn"
-                >
-                  Mark Already Used
-                </button>
               </div>
             )}
 
