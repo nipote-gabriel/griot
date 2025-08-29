@@ -133,7 +133,7 @@ function shuffleAnswersForReorder(game) {
   
   const trueAnswer = {
     id: 'true',
-    ending: game.selectedPhrase.trueEnding,
+    ending: game.selectedPhrase.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
     isTrue: true
   }
   
@@ -189,12 +189,23 @@ function calculateResults(game) {
   
   game.selections.forEach(sel => {
     const player = game.players.find(p => p.id === sel.playerId)
-    if (sel.answerId === 'true') {
+    
+    // Check if player picked their own answer (zero points)
+    const theirSubmission = game.submissions.find(s => s.playerId === player.id)
+    const pickedOwnAnswer = theirSubmission && sel.answerId === theirSubmission.id
+    
+    if (!pickedOwnAnswer && sel.answerId === 'true') {
       player.score += 2
       roundScoring.push({
         player,
         points: 2,
         reason: 'Found the true answer'
+      })
+    } else if (pickedOwnAnswer) {
+      roundScoring.push({
+        player,
+        points: 0,
+        reason: 'Picked your own answer'
       })
     }
   })
@@ -211,6 +222,18 @@ function calculateResults(game) {
       })
     }
   })
+  
+  // Check if reader gets bonus (3 points if nobody found true answer)
+  const reader = game.players[game.currentReader]
+  const anyonePickedTrue = game.selections.some(s => s.answerId === 'true')
+  if (!anyonePickedTrue) {
+    reader.score += 3
+    roundScoring.push({
+      player: reader,
+      points: 3,
+      reason: 'Nobody found the true answer'
+    })
+  }
   
   game.roundScoring = roundScoring
   
@@ -620,7 +643,7 @@ function handleSubmitEnding(ws, data) {
   const submission = {
     id: existingIndex === -1 ? generateId() : game.submissions[existingIndex].id,
     playerId,
-    ending: ending.trim()
+    ending: ending.trim().replace(/\.+$/, '') // Remove trailing periods
   }
   
   if (existingIndex === -1) {

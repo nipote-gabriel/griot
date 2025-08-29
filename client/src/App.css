@@ -670,6 +670,64 @@ button:disabled {
   margin: 16px 0;
 }
 
+.reorder-list {
+  margin: 20px 0;
+}
+
+.reorder-item {
+  display: flex;
+  align-items: center;
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.reorder-item:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+}
+
+.reorder-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+  cursor: grabbing;
+}
+
+.reorder-item.true-answer {
+  background: #f0fff4;
+  border-color: #68d391;
+}
+
+.drag-handle {
+  color: #718096;
+  font-weight: bold;
+  font-size: 18px;
+  margin-right: 12px;
+  cursor: grab;
+}
+
+.answer-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reorder-instructions {
+  text-align: center;
+  background: #ebf8ff;
+  border: 1px solid #90cdf4;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  color: #2b6cb0;
+  font-size: 14px;
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 12px;

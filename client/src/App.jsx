@@ -19,6 +19,8 @@ function App() {
   const [currentLocalPlayer, setCurrentLocalPlayer] = useState(0)
   const [phraseOptions, setPhraseOptions] = useState([])
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
+  const [answerOrder, setAnswerOrder] = useState([])
+  const [draggedIndex, setDraggedIndex] = useState(null)
 
   const wsRef = useRef(null)
 
@@ -570,35 +572,103 @@ function App() {
                     // Create ordered answers with true answer mixed in
                     const playerSubmissions = game.submissions.map(sub => ({
                       id: sub.id,
-                      ending: sub.ending,
+                      ending: sub.ending.replace(/\.+$/, ''), // Remove trailing periods
                       playerId: sub.playerId,
                       isTrue: false
                     }))
                     
                     const trueAnswer = {
                       id: 'true',
-                      ending: game.selectedPhrase.trueEnding,
+                      ending: game.selectedPhrase.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
                       isTrue: true
                     }
                     
                     const allAnswers = [...playerSubmissions, trueAnswer]
-                    // Simple shuffle
+                    // Initial shuffle
                     for (let i = allAnswers.length - 1; i > 0; i--) {
                       const j = Math.floor(Math.random() * (i + 1));
                       [allAnswers[i], allAnswers[j]] = [allAnswers[j], allAnswers[i]]
                     }
                     
-                    setGame({...game, orderedAnswers: allAnswers, phase: 'selections', currentChooser: game.currentReader === 0 ? 1 : 0})
+                    setAnswerOrder(allAnswers)
+                    setGame({...game, phase: 'reordering'})
                   }}
                   className="primary-btn"
                 >
-                  Shuffle Answers & Start Voting
+                  Organize Answers
                 </button>
               </div>
             </div>
           </div>
         )
       }
+    }
+    
+    if (game.phase === 'reordering') {
+      return (
+        <div className="app">
+          <div className="container">
+            <h2>Arrange the Answers</h2>
+            <div className="pass-device">
+              <div className="current-player">
+                <span className="player-emoji">{currentPlayer.emoji}</span>
+                <h3>{currentPlayer.nickname}</h3>
+                <p>Drag answers up and down to reorder them</p>
+              </div>
+              
+              <div className="phrase-card">
+                <p className="first-half">{game.selectedPhrase.firstHalf}</p>
+                <p className="continuation">...</p>
+              </div>
+
+              <div className="reorder-list">
+                {answerOrder.map((answer, index) => (
+                  <div
+                    key={answer.id}
+                    className={`reorder-item ${answer.isTrue ? 'true-answer' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
+                    draggable
+                    onDragStart={() => setDraggedIndex(index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (draggedIndex !== null && draggedIndex !== index) {
+                        const newOrder = [...answerOrder]
+                        const [draggedItem] = newOrder.splice(draggedIndex, 1)
+                        newOrder.splice(index, 0, draggedItem)
+                        setAnswerOrder(newOrder)
+                      }
+                      setDraggedIndex(null)
+                    }}
+                    onDragEnd={() => setDraggedIndex(null)}
+                  >
+                    <div className="drag-handle">≡</div>
+                    <div className="answer-content">
+                      <span className="answer-number">{index + 1}.</span>
+                      <span className="answer-text">...{answer.ending}</span>
+                    </div>
+                    {answer.isTrue && <span className="true-badge">TRUE</span>}
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => {
+                  const nextChooserIndex = game.currentReader === 0 ? 1 : 0
+                  setGame({
+                    ...game, 
+                    orderedAnswers: answerOrder, 
+                    phase: 'selections', 
+                    currentChooser: nextChooserIndex
+                  })
+                }}
+                className="primary-btn"
+              >
+                Confirm Order & Start Voting
+              </button>
+            </div>
+          </div>
+        </div>
+      )
     }
     
     if (game.phase === 'selections') {
@@ -665,14 +735,19 @@ function App() {
           game.players.forEach(player => {
             let points = 0
             
-            // Check if picked true answer (2 points)
-            const pickedTrue = game.selections.some(s => s.playerId === player.id && s.answerId === 'true')
-            if (pickedTrue) {
-              points += 2
+            // Check if player picked their own answer (zero points)
+            const theirSubmission = game.submissions.find(s => s.playerId === player.id)
+            const pickedOwnAnswer = theirSubmission && game.selections.some(s => s.playerId === player.id && s.answerId === theirSubmission.id)
+            
+            if (!pickedOwnAnswer) {
+              // Check if picked true answer (2 points)
+              const pickedTrue = game.selections.some(s => s.playerId === player.id && s.answerId === 'true')
+              if (pickedTrue) {
+                points += 2
+              }
             }
             
             // Check votes on their bluff (2 points each)
-            const theirSubmission = game.submissions.find(s => s.playerId === player.id)
             if (theirSubmission) {
               const votes = game.selections.filter(s => s.answerId === theirSubmission.id).length
               points += votes * 2
@@ -736,15 +811,22 @@ function App() {
                   let points = 0
                   let reasons = []
                   
-                  // Check if picked true answer (2 points)
-                  const pickedTrue = game.selections.some(s => s.playerId === player.id && s.answerId === 'true')
-                  if (pickedTrue) {
-                    points += 2
-                    reasons.push('Found the true answer (+2)')
+                  // Check if player picked their own answer (zero points)
+                  const theirSubmission = game.submissions.find(s => s.playerId === player.id)
+                  const pickedOwnAnswer = theirSubmission && game.selections.some(s => s.playerId === player.id && s.answerId === theirSubmission.id)
+                  
+                  if (pickedOwnAnswer) {
+                    reasons.push('Picked your own answer (+0)')
+                  } else {
+                    // Check if picked true answer (2 points)
+                    const pickedTrue = game.selections.some(s => s.playerId === player.id && s.answerId === 'true')
+                    if (pickedTrue) {
+                      points += 2
+                      reasons.push('Found the true answer (+2)')
+                    }
                   }
                   
                   // Check votes on their bluff (2 points each)
-                  const theirSubmission = game.submissions.find(s => s.playerId === player.id)
                   if (theirSubmission) {
                     const votes = game.selections.filter(s => s.answerId === theirSubmission.id).length
                     if (votes > 0) {
