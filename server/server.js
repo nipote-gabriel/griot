@@ -212,7 +212,8 @@ function calculateResults(game) {
   
   playerAnswers.forEach(answer => {
     const author = game.players.find(p => p.id === answer.playerId)
-    const votes = selectionCounts.get(answer.id) || 0
+    // Count votes excluding self-votes
+    const votes = game.selections.filter(s => s.answerId === answer.id && s.playerId !== author.id).length
     if (votes > 0) {
       author.score += votes
       roundScoring.push({

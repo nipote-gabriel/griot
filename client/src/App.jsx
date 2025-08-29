@@ -21,6 +21,7 @@ function App() {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
   const [answerOrder, setAnswerOrder] = useState([])
   const [draggedIndex, setDraggedIndex] = useState(null)
+  const [showSubmissionConfirm, setShowSubmissionConfirm] = useState(false)
 
   const wsRef = useRef(null)
 
@@ -529,26 +530,48 @@ function App() {
                 <div className="form-group">
                   <textarea
                     value={submission}
-                    onChange={(e) => setSubmission(e.target.value)}
+                    onChange={(e) => {
+                      setSubmission(e.target.value)
+                      setShowSubmissionConfirm(false)
+                    }}
                     placeholder="Write your creative ending..."
                     maxLength={100}
                   />
-                  <button 
-                    onClick={() => {
-                      if (submission.trim()) {
-                        const newSubmission = {
-                          id: Date.now().toString(),
-                          playerId: currentWriter.id,
-                          ending: submission.trim()
-                        }
-                        setGame({...game, submissions: [...game.submissions, newSubmission]})
-                        setSubmission('')
-                      }
-                    }}
-                    disabled={!submission.trim()}
-                  >
-                    Submit & Pass Device
-                  </button>
+                  {!showSubmissionConfirm ? (
+                    <button 
+                      onClick={() => setShowSubmissionConfirm(true)}
+                      disabled={!submission.trim()}
+                    >
+                      Review Answer
+                    </button>
+                  ) : (
+                    <div className="submission-preview">
+                      <p><strong>Your answer:</strong> "{submission.trim()}"</p>
+                      <div className="phrase-actions">
+                        <button 
+                          onClick={() => setShowSubmissionConfirm(false)}
+                          className="nav-btn"
+                        >
+                          Edit Answer
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const newSubmission = {
+                              id: Date.now().toString(),
+                              playerId: currentWriter.id,
+                              ending: submission.trim()
+                            }
+                            setGame({...game, submissions: [...game.submissions, newSubmission]})
+                            setSubmission('')
+                            setShowSubmissionConfirm(false)
+                          }}
+                          className="primary-btn"
+                        >
+                          Lock It In & Pass Device
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -747,9 +770,9 @@ function App() {
               }
             }
             
-            // Check votes on their bluff (2 points each)
+            // Check votes on their bluff (2 points each, excluding self-votes)
             if (theirSubmission) {
-              const votes = game.selections.filter(s => s.answerId === theirSubmission.id).length
+              const votes = game.selections.filter(s => s.answerId === theirSubmission.id && s.playerId !== player.id).length
               points += votes * 2
             }
             
@@ -826,9 +849,9 @@ function App() {
                     }
                   }
                   
-                  // Check votes on their bluff (2 points each)
+                  // Check votes on their bluff (2 points each, excluding self-votes)
                   if (theirSubmission) {
-                    const votes = game.selections.filter(s => s.answerId === theirSubmission.id).length
+                    const votes = game.selections.filter(s => s.answerId === theirSubmission.id && s.playerId !== player.id).length
                     if (votes > 0) {
                       const bluffPoints = votes * 2
                       points += bluffPoints
@@ -1046,13 +1069,46 @@ function App() {
               <div className="form-group">
                 <textarea
                   value={submission}
-                  onChange={(e) => setSubmission(e.target.value)}
+                  onChange={(e) => {
+                    setSubmission(e.target.value)
+                    setShowSubmissionConfirm(false)
+                  }}
                   placeholder="Write your creative ending..."
                   maxLength={100}
                 />
-                <button onClick={submitEnding} disabled={!submission.trim()}>
-                  {hasSubmitted ? 'Update Submission' : 'Submit'}
-                </button>
+                {!showSubmissionConfirm && !hasSubmitted ? (
+                  <button 
+                    onClick={() => setShowSubmissionConfirm(true)}
+                    disabled={!submission.trim()}
+                  >
+                    Review Answer
+                  </button>
+                ) : hasSubmitted ? (
+                  <button onClick={submitEnding} disabled={!submission.trim()}>
+                    Update Submission
+                  </button>
+                ) : (
+                  <div className="submission-preview">
+                    <p><strong>Your answer:</strong> "{submission.trim()}"</p>
+                    <div className="phrase-actions">
+                      <button 
+                        onClick={() => setShowSubmissionConfirm(false)}
+                        className="nav-btn"
+                      >
+                        Edit Answer
+                      </button>
+                      <button 
+                        onClick={() => {
+                          submitEnding()
+                          setShowSubmissionConfirm(false)
+                        }}
+                        className="primary-btn"
+                      >
+                        Lock It In
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {hasSubmitted && (
