@@ -156,6 +156,18 @@ button:disabled {
   border-color: #667eea;
 }
 
+.emoji-btn.used {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.emoji-btn.used:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+}
+
 .mode-selector {
   display: flex;
   gap: 8px;
@@ -387,18 +399,19 @@ button:disabled {
 
 .mark-used-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   background: #ed8936;
   color: white;
   border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
   z-index: 10;
+  line-height: 1;
 }
 
 .mark-used-btn:hover {

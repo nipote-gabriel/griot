@@ -246,15 +246,22 @@ function App() {
               <div className="form-group">
                 <label>Pick your emoji:</label>
                 <div className="emoji-grid">
-                  {EMOJI_AVATARS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      className={`emoji-btn ${selectedEmoji === emoji ? 'selected' : ''}`}
-                      onClick={() => setSelectedEmoji(emoji)}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+                  {EMOJI_AVATARS.map((emoji) => {
+                    const isUsed = lobby?.players?.some(p => p.emoji === emoji) || false
+                    const isSelected = selectedEmoji === emoji
+                    
+                    return (
+                      <button
+                        key={emoji}
+                        className={`emoji-btn ${isSelected ? 'selected' : ''} ${isUsed && !isSelected ? 'used' : ''}`}
+                        onClick={() => !isUsed && setSelectedEmoji(emoji)}
+                        disabled={isUsed && !isSelected}
+                        title={isUsed && !isSelected ? 'This emoji is already taken' : ''}
+                      >
+                        {emoji}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -292,15 +299,22 @@ function App() {
               <div className="form-group">
                 <label>Pick emoji for this player:</label>
                 <div className="emoji-grid">
-                  {EMOJI_AVATARS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      className={`emoji-btn ${selectedEmoji === emoji ? 'selected' : ''}`}
-                      onClick={() => setSelectedEmoji(emoji)}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+                  {EMOJI_AVATARS.map((emoji) => {
+                    const isUsed = localPlayers.some(p => p.emoji === emoji)
+                    const isSelected = selectedEmoji === emoji
+                    
+                    return (
+                      <button
+                        key={emoji}
+                        className={`emoji-btn ${isSelected ? 'selected' : ''} ${isUsed && !isSelected ? 'used' : ''}`}
+                        onClick={() => !isUsed && setSelectedEmoji(emoji)}
+                        disabled={isUsed && !isSelected}
+                        title={isUsed && !isSelected ? 'This emoji is already taken' : ''}
+                      >
+                        {emoji}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -454,20 +468,29 @@ function App() {
                 <div className="phrase-card">
                   <button 
                     onClick={() => {
-                      // Mark this phrase as used and get a new one
+                      // Mark current phrase as used and replace with new one
                       const newUsedIds = [...game.usedPhraseIds, currentPhrase.id]
-                      const newOptions = phraseOptions.filter(p => p.id !== currentPhrase.id)
                       
-                      if (newOptions.length === 0) {
-                        // All phrases from current set are used, generate new ones
-                        // This would need server call in real implementation
-                        setMessage("All phrases in current set are known. Please refresh for new phrases.")
+                      // Get available phrases excluding already used and currently selected ones
+                      const currentlySelected = phraseOptions.map(p => p.id)
+                      const availablePhrases = PHRASES.filter(p => 
+                        !newUsedIds.includes(p.id) && !currentlySelected.includes(p.id)
+                      )
+                      
+                      if (availablePhrases.length === 0) {
+                        setMessage("All available phrases have been used. Please start a new game.")
                         return
                       }
                       
-                      // Update the phrase options and set used phrase tracking
+                      // Get a random replacement phrase
+                      const randomIndex = Math.floor(Math.random() * availablePhrases.length)
+                      const replacementPhrase = availablePhrases[randomIndex]
+                      
+                      // Replace the current phrase with the new one
+                      const newOptions = [...phraseOptions]
+                      newOptions[currentPhraseIndex] = replacementPhrase
+                      
                       setPhraseOptions(newOptions)
-                      setCurrentPhraseIndex(0)
                       setGame({...game, usedPhraseIds: newUsedIds})
                     }}
                     className="mark-used-btn"
