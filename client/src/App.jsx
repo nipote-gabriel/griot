@@ -17,6 +17,8 @@ function App() {
   const [gameMode, setGameMode] = useState('online') // 'online' or 'local'
   const [localPlayers, setLocalPlayers] = useState([])
   const [currentLocalPlayer, setCurrentLocalPlayer] = useState(0)
+  const [phraseOptions, setPhraseOptions] = useState([])
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0)
 
   const wsRef = useRef(null)
 
@@ -421,14 +423,79 @@ function App() {
                     { id: 19, firstHalf: "The lot is cast into the lap", trueEnding: "but its every decision is from the Lord." },
                     { id: 20, firstHalf: "A gentle tongue", trueEnding: "is a tree of life." }
                   ]
+                  
+                  // Get 5 random available phrases for the reader to choose from
                   const availablePhrases = phrases.filter(p => !game.usedPhraseIds.includes(p.id))
-                  const randomPhrase = availablePhrases[Math.floor(Math.random() * availablePhrases.length)]
-                  setGame({...game, selectedPhrase: randomPhrase, phase: 'writing', usedPhraseIds: [...game.usedPhraseIds, randomPhrase.id]})
+                  const shuffled = [...availablePhrases].sort(() => Math.random() - 0.5)
+                  const fiveOptions = shuffled.slice(0, 5)
+                  
+                  setPhraseOptions(fiveOptions)
+                  setCurrentPhraseIndex(0)
+                  setGame({...game, phase: 'phrase_browsing'})
                 }}
                 className="primary-btn"
               >
-                Pick Random Phrase & Start Round
+                Browse & Select Phrase
               </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    if (game.phase === 'phrase_browsing') {
+      const currentPhrase = phraseOptions[currentPhraseIndex]
+      return (
+        <div className="app">
+          <div className="container">
+            <h2>Choose Your Phrase</h2>
+            <div className="pass-device">
+              <div className="current-player">
+                <span className="player-emoji">{currentPlayer.emoji}</span>
+                <h3>{currentPlayer.nickname}</h3>
+                <p>Browse through 5 phrases and pick your favorite</p>
+              </div>
+              
+              <div className="phrase-browser">
+                <div className="phrase-counter">
+                  <span>Phrase {currentPhraseIndex + 1} of {phraseOptions.length}</span>
+                </div>
+                
+                <div className="phrase-card">
+                  <p className="first-half">{currentPhrase.firstHalf}</p>
+                  <p className="true-ending">...{currentPhrase.trueEnding}</p>
+                </div>
+                
+                <div className="phrase-navigation">
+                  <button 
+                    onClick={() => setCurrentPhraseIndex((currentPhraseIndex - 1 + phraseOptions.length) % phraseOptions.length)}
+                    className="nav-btn"
+                  >
+                    ← Previous
+                  </button>
+                  
+                  <button 
+                    onClick={() => setCurrentPhraseIndex((currentPhraseIndex + 1) % phraseOptions.length)}
+                    className="nav-btn"
+                  >
+                    Next →
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={() => {
+                    setGame({
+                      ...game, 
+                      selectedPhrase: currentPhrase, 
+                      phase: 'writing', 
+                      usedPhraseIds: [...game.usedPhraseIds, currentPhrase.id]
+                    })
+                  }}
+                  className="primary-btn"
+                >
+                  Select This Phrase
+                </button>
+              </div>
             </div>
           </div>
         </div>
