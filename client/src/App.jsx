@@ -467,8 +467,32 @@ function App() {
                 </div>
                 
                 <div className="phrase-card">
+                  <p className="phrase-origin">There is an old {currentPhrase.origin} phrase:</p>
                   <p className="first-half">{currentPhrase.firstHalf}</p>
                   <p className="true-ending">...{currentPhrase.trueEnding}</p>
+                  
+                  <button 
+                    onClick={() => {
+                      // Mark this phrase as used and get a new one
+                      const newUsedIds = [...game.usedPhraseIds, currentPhrase.id]
+                      const newOptions = phraseOptions.filter(p => p.id !== currentPhrase.id)
+                      
+                      if (newOptions.length === 0) {
+                        // All phrases from current set are used, generate new ones
+                        // This would need server call in real implementation
+                        setMessage("All phrases in current set are known. Please refresh for new phrases.")
+                        return
+                      }
+                      
+                      // Update the phrase options and set used phrase tracking
+                      setPhraseOptions(newOptions)
+                      setCurrentPhraseIndex(0)
+                      setGame({...game, usedPhraseIds: newUsedIds})
+                    }}
+                    className="mark-used-btn"
+                  >
+                    Mark Already Used
+                  </button>
                 </div>
                 
                 <div className="phrase-navigation">
@@ -983,6 +1007,7 @@ function App() {
             
             {game.candidatePhrase && (
               <div className="phrase-card">
+                <p className="phrase-origin">There is an old {game.candidatePhrase.origin} phrase:</p>
                 <p className="first-half">{game.candidatePhrase.firstHalf}</p>
                 <p className="true-ending">...{game.candidatePhrase.trueEnding}</p>
                 
@@ -992,6 +1017,13 @@ function App() {
                     Select This Phrase
                   </button>
                 </div>
+                
+                <button 
+                  onClick={requestNextPhrase}
+                  className="mark-used-btn"
+                >
+                  Mark Already Used
+                </button>
               </div>
             )}
 

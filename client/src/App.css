@@ -376,6 +376,31 @@ button:disabled {
   text-align: center;
 }
 
+.phrase-origin {
+  font-size: 14px;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.mark-used-btn {
+  background: #ed8936;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s ease;
+}
+
+.mark-used-btn:hover {
+  background: #dd7724;
+}
+
 .first-half {
   font-size: 18px;
   font-weight: 600;
