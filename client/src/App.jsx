@@ -22,6 +22,8 @@ function App() {
   const [answerOrder, setAnswerOrder] = useState([])
   const [draggedIndex, setDraggedIndex] = useState(null)
   const [showSubmissionConfirm, setShowSubmissionConfirm] = useState(false)
+  const [selectedAnswer, setSelectedAnswer] = useState(null)
+  const [showVoteConfirm, setShowVoteConfirm] = useState(false)
 
   const wsRef = useRef(null)
 
@@ -722,24 +724,8 @@ function App() {
                       key={answer.id}
                       className="answer-button"
                       onClick={() => {
-                        const newSelection = {
-                          playerId: chooser.id,
-                          answerId: answer.id
-                        }
-                        
-                        const updatedSelections = [...game.selections, newSelection]
-                        
-                        // Find next voter (excluding reader and those who already voted)
-                        const nextChooserIndex = game.players.findIndex((player, i) => 
-                          i !== game.currentReader && 
-                          !updatedSelections.some(s => s.playerId === player.id)
-                        )
-                        
-                        setGame({
-                          ...game, 
-                          selections: updatedSelections,
-                          currentChooser: nextChooserIndex === -1 ? game.currentChooser : nextChooserIndex
-                        })
+                        setSelectedAnswer(answer)
+                        setShowVoteConfirm(true)
                       }}
                     >
                       <span className="answer-number">{idx + 1}.</span>
@@ -747,6 +733,51 @@ function App() {
                     </button>
                   ))}
                 </div>
+
+                {showVoteConfirm && selectedAnswer && (
+                  <div className="submission-preview">
+                    <p><strong>You selected:</strong> "{game.selectedPhrase.firstHalf} {selectedAnswer.ending}"</p>
+                    <div className="phrase-actions">
+                      <button 
+                        onClick={() => {
+                          setShowVoteConfirm(false)
+                          setSelectedAnswer(null)
+                        }}
+                        className="nav-btn"
+                      >
+                        Choose Different
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const newSelection = {
+                            playerId: chooser.id,
+                            answerId: selectedAnswer.id
+                          }
+                          
+                          const updatedSelections = [...game.selections, newSelection]
+                          
+                          // Find next voter (excluding reader and those who already voted)
+                          const nextChooserIndex = game.players.findIndex((player, i) => 
+                            i !== game.currentReader && 
+                            !updatedSelections.some(s => s.playerId === player.id)
+                          )
+                          
+                          setGame({
+                            ...game, 
+                            selections: updatedSelections,
+                            currentChooser: nextChooserIndex === -1 ? game.currentChooser : nextChooserIndex
+                          })
+                          
+                          setShowVoteConfirm(false)
+                          setSelectedAnswer(null)
+                        }}
+                        className="primary-btn"
+                      >
+                        Lock It In
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1214,7 +1245,7 @@ function App() {
                     <button
                       key={answer.id}
                       className={`answer-button ${isMyAnswer ? 'my-answer' : ''}`}
-                      onClick={() => !isMyAnswer && selectAnswer(answer.id)}
+                      onClick={() => !isMyAnswer && (setSelectedAnswer(answer), setShowVoteConfirm(true))}
                       disabled={isMyAnswer}
                     >
                       <span className="answer-number">{idx + 1}.</span>
@@ -1224,6 +1255,33 @@ function App() {
                   )
                 })}
               </div>
+
+              {showVoteConfirm && selectedAnswer && (
+                <div className="submission-preview">
+                  <p><strong>You selected:</strong> "{game.selectedPhrase.firstHalf} {selectedAnswer.ending}"</p>
+                  <div className="phrase-actions">
+                    <button 
+                      onClick={() => {
+                        setShowVoteConfirm(false)
+                        setSelectedAnswer(null)
+                      }}
+                      className="nav-btn"
+                    >
+                      Choose Different
+                    </button>
+                    <button 
+                      onClick={() => {
+                        selectAnswer(selectedAnswer.id)
+                        setShowVoteConfirm(false)
+                        setSelectedAnswer(null)
+                      }}
+                      className="primary-btn"
+                    >
+                      Lock It In
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="timer">
                 Time: {30 - Math.floor((Date.now() - game.phaseStartTime) / 1000)}s
