@@ -119,11 +119,8 @@ function advanceToNextPhase(game) {
       break
     
     case 'reveal':
-      if (game.winner) {
-        return
-      }
-      advanceToNextRound(game)
-      break
+      // Don't auto-advance from reveal - wait for reader to click Next Round
+      return
   }
   
   broadcast(lobbyCode, {
