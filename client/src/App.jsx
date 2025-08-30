@@ -29,7 +29,7 @@ function App() {
   const wsRef = useRef(null)
 
   useEffect(() => {
-    const socket = new WebSocket('ws://localhost:3001')
+    const socket = new WebSocket('wss://soothsayer-websocket.onrender.com')
     
     socket.onopen = () => {
       console.log('Connected to server')

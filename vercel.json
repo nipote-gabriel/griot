@@ -7,23 +7,20 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "server/server.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "client/$1"
-    }
-  ],
-  "functions": {
-    "server/server.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "rewrites": [
+      "src": "/api/(.*)",
+      "dest": "/server/server.js"
+    },
     {
-      "source": "/api/(.*)",
-      "destination": "/server/$1"
+      "src": "/(.*)",
+      "dest": "/client/$1"
     }
   ]
 }

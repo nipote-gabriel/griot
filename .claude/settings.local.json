@@ -20,7 +20,8 @@
       "Bash(brew install:*)",
       "Bash(git push origin main)",
       "Bash(vercel:*)",
-      "Bash(sudo chown:*)"
+      "Bash(sudo chown:*)",
+      "WebFetch(domain:soothsayer-c2jjee081-gabes-projects-ab8ecd28.vercel.app)"
     ],
     "deny": [],
     "ask": []
