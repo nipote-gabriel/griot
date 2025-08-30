@@ -810,9 +810,20 @@ function handleSelectAnswer(ws, data) {
   })
   
   // Check if all non-readers have voted
+  console.log(`Vote check: ${game.selections.length} votes, ${nonReaders.length} non-readers needed`)
   if (game.selections.length >= nonReaders.length) {
     console.log(`All players voted (${game.selections.length}/${nonReaders.length}). Advancing phase...`)
-    advanceToNextPhase(game)
+    
+    // Immediately advance to reveal phase
+    game.phase = 'reveal'
+    game.phaseStartTime = Date.now()
+    calculateResults(game)
+    
+    console.log(`Phase advanced to: ${game.phase}`)
+    broadcast(game.lobbyCode, {
+      type: 'game_updated',
+      game
+    })
   } else {
     console.log(`Waiting for more votes: ${game.selections.length}/${nonReaders.length}`)
   }
