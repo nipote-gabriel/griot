@@ -29,7 +29,9 @@ function App() {
   const wsRef = useRef(null)
 
   useEffect(() => {
-    const socket = new WebSocket('wss://soothsayer-websocket.onrender.com')
+    // WebSocket URL - will use environment variable in production or fallback
+    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'wss://soothsayer-websocket.onrender.com'
+    const socket = new WebSocket(wsUrl)
     
     socket.onopen = () => {
       console.log('Connected to server')
