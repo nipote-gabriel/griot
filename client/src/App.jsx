@@ -1094,77 +1094,6 @@ function App() {
       }
     }
 
-    // Confirmation Dialogs for Local Game
-    if (showHomeConfirm || showInfoDialog || showRecycleConfirm) {
-      return (
-        <div className="app">
-          <div className="container">
-            <LocalGameButtons />
-            {/* Current game content would go here, but dialogs will overlay it */}
-          </div>
-
-          {/* Home Confirmation Dialog */}
-          {showHomeConfirm && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Leave Game?</h3>
-                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
-                </div>
-                <p>Are you sure you want to leave the game and go home?</p>
-                <div className="dialog-actions">
-                  <button onClick={() => setShowHomeConfirm(false)} className="cancel-btn">Cancel</button>
-                  <button onClick={handleHomeConfirm} className="confirm-btn">Leave Game</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Info Dialog */}
-          {showInfoDialog && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Game Info</h3>
-                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
-                </div>
-                <div className="info-content">
-                  <p><strong>Round:</strong> {game.round}</p>
-                  <div className="players-scores">
-                    <h4>Players & Scores:</h4>
-                    {game.players
-                      .sort((a, b) => b.score - a.score)
-                      .map(p => (
-                        <div key={p.id} className="score-row">
-                          <span>{p.emoji} {p.nickname}</span>
-                          <span className="score">{p.score}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Recycle Confirmation Dialog */}
-          {showRecycleConfirm && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Recycle Saying?</h3>
-                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
-                </div>
-                <p>Someone knows this saying already. Pick a new saying?</p>
-                <div className="dialog-actions">
-                  <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
-                  <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )
-    }
   }
 
   if (gameState === 'game' && game) {
@@ -1245,63 +1174,6 @@ function App() {
             )}
           </div>
 
-          {/* Confirmation Dialogs */}
-          {showHomeConfirm && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Leave Game?</h3>
-                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
-                </div>
-                <p>Are you sure you want to leave the game and go home? You will be removed from the lobby.</p>
-                <div className="dialog-actions">
-                  <button onClick={() => setShowHomeConfirm(false)} className="cancel-btn">Cancel</button>
-                  <button onClick={handleHomeConfirm} className="confirm-btn">Leave Game</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showInfoDialog && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Game Info</h3>
-                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
-                </div>
-                <div className="info-content">
-                  <p><strong>Lobby:</strong> {lobby?.code}</p>
-                  <div className="players-scores">
-                    <h4>Players & Scores:</h4>
-                    {game.players
-                      .sort((a, b) => b.score - a.score)
-                      .map(p => (
-                        <div key={p.id} className="score-row">
-                          <span>{p.emoji} {p.nickname}</span>
-                          <span className="score">{p.score}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showRecycleConfirm && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Recycle Saying?</h3>
-                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
-                </div>
-                <p>This will notify all players that someone knows this saying and pick a new one. Continue?</p>
-                <div className="dialog-actions">
-                  <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
-                  <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )
     }
@@ -1310,6 +1182,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Waiting for Reader</h2>
             <p>Round {game.round}</p>
             <p className="reader-name">
@@ -1338,6 +1211,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Read Aloud</h2>
             <p>Round {game.round}</p>
             
@@ -1361,6 +1235,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Reader is Reading...</h2>
             <p>Round {game.round}</p>
             <p>Listen carefully to the saying!</p>
@@ -1374,6 +1249,7 @@ function App() {
         return (
           <div className="app">
             <div className="container">
+              <GameButtons />
               <h2>Writers are Writing</h2>
               <p>Round {game.round}</p>
               
@@ -1401,6 +1277,7 @@ function App() {
         return (
           <div className="app">
             <div className="container">
+              <GameButtons />
               <h2>Write Your Ending</h2>
               <p>Round {game.round}</p>
               
@@ -1494,6 +1371,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Arrange the Answers</h2>
             <p>Round {game.round}</p>
             
@@ -1551,6 +1429,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Reader is Organizing</h2>
             <p>Round {game.round}</p>
             <p>The Reader is putting the answers in order...</p>
@@ -1567,6 +1446,7 @@ function App() {
         return (
           <div className="app">
             <div className="container">
+              <GameButtons />
               <h2>Players are Choosing</h2>
               <p>Round {game.round}</p>
               <p>Votes: {game.selections.length}/{nonReaders.length}</p>
@@ -1598,6 +1478,7 @@ function App() {
           return (
             <div className="app">
               <div className="container">
+                <GameButtons />
                 <h2>Waiting for Other Players</h2>
                 <p>Round {game.round}</p>
                 <p>You've made your selection. Waiting for others...</p>
@@ -1610,6 +1491,7 @@ function App() {
         return (
           <div className="app">
             <div className="container">
+              <GameButtons />
               <h2>Your Turn to Choose</h2>
               <p>Round {game.round}</p>
               
@@ -1673,6 +1555,7 @@ function App() {
       return (
         <div className="app">
           <div className="container">
+            <GameButtons />
             <h2>Results</h2>
             <p>Round {game.round}</p>
             
@@ -1750,6 +1633,130 @@ function App() {
       <div className="container">
         <h1>Connecting...</h1>
       </div>
+      
+      {/* Global Dialogs that appear on top of any screen */}
+      {gameState === 'game' && (
+        <>
+          {showHomeConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Leave Game?</h3>
+                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>Are you sure you want to leave the game and go home? You will be removed from the lobby.</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowHomeConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleHomeConfirm} className="confirm-btn">Leave Game</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showInfoDialog && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Game Info</h3>
+                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
+                </div>
+                <div className="info-content">
+                  <p><strong>Lobby:</strong> {lobby?.code}</p>
+                  <div className="players-scores">
+                    <h4>Players & Scores:</h4>
+                    {game?.players
+                      ?.sort((a, b) => b.score - a.score)
+                      .map(p => (
+                        <div key={p.id} className="score-row">
+                          <span>{p.emoji} {p.nickname}</span>
+                          <span className="score">{p.score}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showRecycleConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Recycle Saying?</h3>
+                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>This will notify all players that someone knows this saying and pick a new one. Continue?</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Global Dialogs for local game */}
+      {gameState === 'local-game' && (
+        <>
+          {showHomeConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Leave Game?</h3>
+                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>Are you sure you want to leave the game and go home?</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowHomeConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleHomeConfirm} className="confirm-btn">Leave Game</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showInfoDialog && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Game Info</h3>
+                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
+                </div>
+                <div className="info-content">
+                  <p><strong>Round:</strong> {game?.round}</p>
+                  <div className="players-scores">
+                    <h4>Players & Scores:</h4>
+                    {game?.players
+                      ?.sort((a, b) => b.score - a.score)
+                      .map(p => (
+                        <div key={p.id} className="score-row">
+                          <span>{p.emoji} {p.nickname}</span>
+                          <span className="score">{p.score}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showRecycleConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Recycle Saying?</h3>
+                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>Someone knows this saying already. Pick a new saying?</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
