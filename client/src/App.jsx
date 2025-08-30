@@ -53,6 +53,14 @@ function App() {
           break
         case 'lobby_updated':
           setLobby(data.lobby)
+          // Check if current player was removed from lobby
+          if (player && !data.lobby.players.some(p => p.id === player.id)) {
+            // Player was kicked, return to home
+            setGameState('lobby')
+            setLobby(null)
+            setPlayer(null)
+            setMessage('You were removed from the lobby')
+          }
           break
         case 'game_started':
           setGame(data.game)
@@ -160,14 +168,12 @@ function App() {
   }
 
   const goBackToHome = () => {
-    if (ws) {
-      ws.close()
-    }
     setGameState('lobby')
     setLobby(null)
     setPlayer(null)
     setGame(null)
     setMessage('')
+    // Don't close WebSocket - keep connection active for immediate use
   }
 
   const addLocalPlayer = () => {
@@ -283,14 +289,19 @@ function App() {
 
               <div className="form-group">
                 <label>Join existing lobby:</label>
-                <input
-                  type="text"
-                  value={lobbyCode}
-                  onChange={(e) => setLobbyCode(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                  placeholder="000"
-                  maxLength={3}
-                />
-                <button onClick={joinLobby} disabled={!ws}>Join Lobby</button>
+                <div className="lobby-join-section">
+                  <input
+                    type="text"
+                    value={lobbyCode}
+                    onChange={(e) => setLobbyCode(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                    placeholder="000"
+                    maxLength={3}
+                    className="lobby-code-input"
+                  />
+                  <button onClick={joinLobby} disabled={!ws} className="join-lobby-btn">
+                    Join Lobby
+                  </button>
+                </div>
               </div>
 
               <div className="divider">OR</div>
@@ -1164,7 +1175,7 @@ function App() {
               </div>
 
               <button onClick={lockRound} className="primary-btn">
-                Lock Round ({30 - Math.floor((Date.now() - game.phaseStartTime) / 1000)}s)
+                Lock Round
               </button>
             </div>
           </div>

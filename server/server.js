@@ -700,10 +700,6 @@ function handleSelectAnswer(ws, data) {
     return
   }
   
-  if (answer.playerId === playerId) {
-    ws.send(JSON.stringify({ type: 'error', message: 'Cannot select your own answer' }))
-    return
-  }
   
   game.selections.push({
     playerId,
