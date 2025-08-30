@@ -224,10 +224,11 @@ function calculateResults(game) {
     // Count votes excluding self-votes
     const votes = game.selections.filter(s => s.answerId === answer.id && s.playerId !== author.id).length
     if (votes > 0) {
-      author.score += votes
+      const bluffPoints = votes * 2
+      author.score += bluffPoints
       roundScoring.push({
         player: author,
-        points: votes,
+        points: bluffPoints,
         reason: `${votes} player${votes > 1 ? 's' : ''} picked your bluff`
       })
     }
@@ -293,56 +294,6 @@ function advanceChooser(game) {
   })
 }
 
-function handleTimeout(game) {
-  const { phase } = game
-  const now = Date.now()
-  const elapsed = (now - game.phaseStartTime) / 1000
-  
-  switch (phase) {
-    case 'writing':
-      if (elapsed >= 30) {
-        advanceToNextPhase(game)
-      }
-      break
-    
-    case 'reorder':
-      if (elapsed >= 30) {
-        advanceToNextPhase(game)
-      }
-      break
-    
-    case 'selections':
-      if (elapsed >= 30) {
-        const nonReaders = game.players.filter(p => p.id !== game.currentReader)
-        const chooser = game.players.find(p => p.id === game.currentChooser)
-        
-        if (chooser && !game.selections.some(s => s.playerId === chooser.id)) {
-          const availableAnswers = game.orderedAnswers.filter(a => 
-            a.playerId !== chooser.id
-          )
-          const randomAnswer = availableAnswers[Math.floor(Math.random() * availableAnswers.length)]
-          
-          game.selections.push({
-            playerId: chooser.id,
-            answerId: randomAnswer.id
-          })
-        }
-        
-        if (game.selections.length >= nonReaders.length) {
-          advanceToNextPhase(game)
-        } else {
-          advanceChooser(game)
-        }
-      }
-      break
-  }
-}
-
-setInterval(() => {
-  games.forEach((game) => {
-    handleTimeout(game)
-  })
-}, 1000)
 
 wss.on('connection', (ws) => {
   console.log('Client connected')
@@ -417,6 +368,9 @@ function handleMessage(ws, data) {
       break
     case 'submit_ending':
       handleSubmitEnding(ws, data)
+      break
+    case 'set_answer_order':
+      handleSetAnswerOrder(ws, data)
       break
     case 'lock_round':
       handleLockRound(ws, data)
@@ -671,6 +625,27 @@ function handleSubmitEnding(ws, data) {
   if (game.submissions.length >= expectedSubmissions) {
     setTimeout(() => advanceToNextPhase(game), 500)
   }
+}
+
+function handleSetAnswerOrder(ws, data) {
+  const { orderedAnswers } = data
+  const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
+  if (!client) return
+  
+  const [playerId] = client
+  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'reorder')
+  
+  if (!game) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Not authorized to set answer order' }))
+    return
+  }
+  
+  game.orderedAnswers = orderedAnswers
+  
+  broadcast(game.lobbyCode, {
+    type: 'game_updated',
+    game
+  })
 }
 
 function handleLockRound(ws, data) {

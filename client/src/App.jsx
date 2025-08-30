@@ -468,6 +468,10 @@ function App() {
                 </div>
                 
                 <div className="saying-card">
+                  <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
+                  <p className="first-half">{currentSaying.firstHalf}</p>
+                  <p className="true-ending">...{currentSaying.trueEnding}</p>
+                  
                   <button 
                     onClick={() => {
                       // Mark current saying as used and replace with new one
@@ -498,12 +502,8 @@ function App() {
                     className="mark-used-btn"
                     title="Mark this saying as already known"
                   >
-                    Used
+                    Mark as Used
                   </button>
-                  
-                  <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
-                  <p className="first-half">{currentSaying.firstHalf}</p>
-                  <p className="true-ending">...{currentSaying.trueEnding}</p>
                 </div>
                 
                 <div className="saying-navigation">
@@ -1018,14 +1018,6 @@ function App() {
             
             {game.candidateSaying && (
               <div className="saying-card">
-                <button 
-                  onClick={requestNextSaying}
-                  className="mark-used-btn"
-                  title="Mark this saying as already known"
-                >
-                  Used
-                </button>
-                
                 <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
                 <p className="first-half">{game.candidateSaying.firstHalf}</p>
                 <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
@@ -1040,6 +1032,13 @@ function App() {
                 </div>
                 
                 <div className="saying-actions">
+                  <button 
+                    onClick={requestNextSaying}
+                    className="mark-used-btn"
+                    title="Mark this saying as already known"
+                  >
+                    Mark as Used
+                  </button>
                   <button onClick={() => selectSaying(game.candidateSaying.id)} className="primary-btn">
                     Select This Saying
                   </button>
@@ -1206,34 +1205,81 @@ function App() {
     }
 
     if (currentPhase === 'reorder' && isReader) {
-      const allAnswers = [...game.submissions, { 
-        id: 'true', 
-        ending: game.selectedSaying.trueEnding,
-        isTrue: true 
-      }]
+      // Initialize answer order if not already set
+      if (!answerOrder || answerOrder.length === 0) {
+        const playerSubmissions = game.submissions.map(sub => ({
+          id: sub.id,
+          ending: sub.ending.replace(/\.+$/, ''),
+          playerId: sub.playerId,
+          isTrue: false
+        }))
+        
+        const trueAnswer = {
+          id: 'true',
+          ending: game.selectedSaying.trueEnding.replace(/\.+$/, ''),
+          isTrue: true
+        }
+        
+        const allAnswers = [...playerSubmissions, trueAnswer]
+        // Initial shuffle
+        for (let i = allAnswers.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allAnswers[i], allAnswers[j]] = [allAnswers[j], allAnswers[i]]
+        }
+        
+        setAnswerOrder(allAnswers)
+      }
       
       return (
         <div className="app">
           <div className="container">
-            <h2>Reorder Answers</h2>
+            <h2>Arrange the Answers</h2>
             <p>Round {game.round}</p>
             
-            <div className="reorder-instructions">
-              <p>Drag to reorder the answers, then lock when ready:</p>
+            <div className="saying-card">
+              <p className="first-half">{game.selectedSaying.firstHalf}</p>
+              <p className="continuation">...</p>
             </div>
 
-            <div className="answers-list">
-              {allAnswers.map((answer, idx) => (
-                <div key={answer.id} className={`answer-item ${answer.isTrue ? 'true-answer' : ''}`}>
-                  <span className="answer-number">{idx + 1}.</span>
-                  <span className="answer-text">...{answer.ending}</span>
+            <div className="reorder-list">
+              {answerOrder.map((answer, index) => (
+                <div
+                  key={answer.id}
+                  className={`reorder-item ${answer.isTrue ? 'true-answer' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
+                  draggable
+                  onDragStart={() => setDraggedIndex(index)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                      const newOrder = [...answerOrder]
+                      const [draggedItem] = newOrder.splice(draggedIndex, 1)
+                      newOrder.splice(index, 0, draggedItem)
+                      setAnswerOrder(newOrder)
+                    }
+                    setDraggedIndex(null)
+                  }}
+                  onDragEnd={() => setDraggedIndex(null)}
+                >
+                  <div className="drag-handle">≡</div>
+                  <div className="answer-content">
+                    <span className="answer-number">{index + 1}.</span>
+                    <span className="answer-text">...{answer.ending}</span>
+                  </div>
                   {answer.isTrue && <span className="true-badge">TRUE</span>}
                 </div>
               ))}
             </div>
 
-            <button onClick={lockRound} className="primary-btn">
-              Lock Order ({30 - Math.floor((Date.now() - game.phaseStartTime) / 1000)}s)
+            <button 
+              onClick={() => {
+                // Send the reordered answers to the server
+                send({ type: 'set_answer_order', orderedAnswers: answerOrder })
+                lockRound()
+              }}
+              className="primary-btn"
+            >
+              Confirm Order & Lock Round
             </button>
           </div>
         </div>
@@ -1335,9 +1381,6 @@ function App() {
                 </div>
               )}
 
-              <div className="timer">
-                Time: {30 - Math.floor((Date.now() - game.phaseStartTime) / 1000)}s
-              </div>
             </div>
           </div>
         )
