@@ -164,6 +164,7 @@ function setupSelections(game) {
 }
 
 function calculateResults(game) {
+  console.log('Starting calculateResults function')
   const trueAnswer = game.orderedAnswers.find(a => a.isTrue)
   const playerAnswers = game.orderedAnswers.filter(a => !a.isTrue)
   
@@ -290,11 +291,14 @@ function calculateResults(game) {
   const winner = game.players.find(p => p.score >= 10)
   if (winner) {
     game.winner = winner
+    console.log(`Game winner found: ${winner.nickname}`)
   } else {
     const currentReaderIndex = game.players.findIndex(p => p.id === game.currentReader)
     const nextReaderIndex = (currentReaderIndex + 1) % game.players.length
     game.nextReader = game.players[nextReaderIndex]
+    console.log(`Next reader will be: ${game.nextReader.nickname}`)
   }
+  console.log('calculateResults function completed successfully')
 }
 
 function advanceToNextRound(game) {
