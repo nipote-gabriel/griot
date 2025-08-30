@@ -25,7 +25,12 @@
       "WebFetch(domain:soothsayer-3o7htr4xg-gabes-projects-ab8ecd28.vercel.app)",
       "Bash(curl:*)",
       "WebFetch(domain:soothsayer-app.vercel.app)",
-      "WebFetch(domain:soothsayer-mmb4wffi4-gabes-projects-ab8ecd28.vercel.app)"
+      "WebFetch(domain:soothsayer-mmb4wffi4-gabes-projects-ab8ecd28.vercel.app)",
+      "WebFetch(domain:soothsayer-140aaqxy2-gabes-projects-ab8ecd28.vercel.app)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_cmoiFp/**)",
+      "Bash(npm run build:*)",
+      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_O9xhhw/**)"
     ],
     "deny": [],
     "ask": []

@@ -5,7 +5,6 @@ import { SAYINGS } from './phrases.js'
 const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧝‍♀️', '🧌', '🧞‍♂️', '🧞‍♀️', '🐉']
 
 function App() {
-  console.log("APP LOADED - DEPLOYMENT TEST")
   const [ws, setWs] = useState(null)
   const [gameState, setGameState] = useState('lobby')
   const [player, setPlayer] = useState(null)
@@ -297,7 +296,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>Soothsayer - TEST DEPLOY</h1>
+          <h1>Soothsayer</h1>
           
           <div className="form-group">
             <label>Game Mode:</label>
