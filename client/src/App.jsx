@@ -296,7 +296,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>Soothsayer</h1>
+          <h1>Soothsayer v2.0</h1>
           
           <div className="form-group">
             <label>Game Mode:</label>
