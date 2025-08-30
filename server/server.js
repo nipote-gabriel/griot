@@ -88,6 +88,7 @@ function getNextSaying(game) {
 
 function advanceToNextPhase(game) {
   const { phase, lobbyCode } = game
+  console.log(`Advancing from phase: ${phase}`)
   
   switch (phase) {
     case 'saying_selection':
@@ -113,9 +114,11 @@ function advanceToNextPhase(game) {
       break
     
     case 'selections':
+      console.log('Advancing from selections to reveal phase')
       game.phase = 'reveal'
       game.phaseStartTime = Date.now()
       calculateResults(game)
+      console.log('Results calculated, phase should be reveal now')
       break
     
     case 'reveal':
@@ -123,6 +126,7 @@ function advanceToNextPhase(game) {
       return
   }
   
+  console.log(`Broadcasting game update for phase: ${game.phase}`)
   broadcast(lobbyCode, {
     type: 'game_updated',
     game
@@ -803,7 +807,10 @@ function handleSelectAnswer(ws, data) {
   
   // Check if all non-readers have voted
   if (game.selections.length >= nonReaders.length) {
+    console.log(`All players voted (${game.selections.length}/${nonReaders.length}). Advancing phase...`)
     advanceToNextPhase(game)
+  } else {
+    console.log(`Waiting for more votes: ${game.selections.length}/${nonReaders.length}`)
   }
 }
 
