@@ -30,8 +30,15 @@ function App() {
   const [showHomeConfirm, setShowHomeConfirm] = useState(false)
   const [showInfoDialog, setShowInfoDialog] = useState(false)
   const [showRecycleConfirm, setShowRecycleConfirm] = useState(false)
+  const [onlineSayingOptions, setOnlineSayingOptions] = useState([])
+  const [currentOnlineSayingIndex, setCurrentOnlineSayingIndex] = useState(0)
 
   const wsRef = useRef(null)
+  const gameStateRef = useRef(gameState)
+
+  useEffect(() => {
+    gameStateRef.current = gameState
+  }, [gameState])
 
   useEffect(() => {
     // WebSocket URL - will use environment variable in production or fallback
@@ -66,6 +73,11 @@ function App() {
             setMessage('You were removed from the lobby')
           }
           break
+        case 'game_ended':
+          setGame(null)
+          setGameState('waiting')
+          setLobby(data.lobby)
+          break
         case 'game_started':
           setGame(data.game)
           setGameState('game')
@@ -82,6 +94,10 @@ function App() {
         case 'error':
           setMessage(data.message)
           break
+        case 'sayings_options':
+          setOnlineSayingOptions(data.sayings)
+          setCurrentOnlineSayingIndex(0)
+          break
       }
     }
 
@@ -89,7 +105,7 @@ function App() {
       console.log('Disconnected from server')
       setWs(null)
       // Return to home screen if disconnected (e.g., kicked from lobby)
-      if (gameState !== 'lobby') {
+      if (gameStateRef.current !== 'lobby') {
         setGameState('lobby')
         setLobby(null)
         setPlayer(null)
@@ -102,6 +118,12 @@ function App() {
       socket.close()
     }
   }, [])
+
+  useEffect(() => {
+    if (gameState === 'game' && game?.phase === 'saying_selection' && player?.id === game.currentReader && onlineSayingOptions.length === 0) {
+      send({ type: 'request_sayings' })
+    }
+  }, [gameState, game, player, onlineSayingOptions])
 
   const send = (data) => {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -1171,7 +1193,46 @@ function App() {
               ).join(' → ')}</small>
             </div>
             
-            {game.candidateSaying && (
+                        {onlineSayingOptions.length > 0 ? (
+              <>
+                <div className="saying-counter">
+                  <span>Saying {currentOnlineSayingIndex + 1} of {onlineSayingOptions.length}</span>
+                </div>
+                
+                <div className="saying-card">
+                  <div className="saying-header">
+                    <button 
+                      onClick={() => {
+                        setOnlineSayingOptions([]);
+                        send({ type: 'request_sayings' });
+                      }}
+                      className="mark-used-btn"
+                      title="Get new sayings"
+                    >
+                      ♻️
+                    </button>
+                    <p className="saying-origin">There is an old {onlineSayingOptions[currentOnlineSayingIndex].origin || 'ancient'} saying:</p>
+                  </div>
+                  <p className="first-half">{onlineSayingOptions[currentOnlineSayingIndex].firstHalf}...</p>
+                  <p className="true-ending">...{onlineSayingOptions[currentOnlineSayingIndex].trueEnding}</p>
+                
+                <div className="saying-navigation">
+                  <button onClick={() => setCurrentOnlineSayingIndex((currentOnlineSayingIndex - 1 + onlineSayingOptions.length) % onlineSayingOptions.length)} className="nav-btn">
+                    ← Previous Saying
+                  </button>
+                  <button onClick={() => setCurrentOnlineSayingIndex((currentOnlineSayingIndex + 1) % onlineSayingOptions.length)} className="nav-btn">
+                    Next Saying →
+                  </button>
+                </div>
+                
+                <div className="saying-actions">
+                  <button onClick={() => selectSaying(onlineSayingOptions[currentOnlineSayingIndex].id)} className="primary-btn">
+                    Select This Saying
+                  </button>
+                </div>
+              </div>
+              </>
+            ) : game.candidateSaying && (
               <>
                 <div className="saying-counter">
                   <span>Saying {sayingCounter}</span>

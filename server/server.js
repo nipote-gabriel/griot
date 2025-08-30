@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws'
 import { createServer } from 'http'
-import { getRandomSaying } from './phrases.js'
+import { SAYINGS, getRandomSaying } from './phrases.js'
 
 const PORT = process.env.PORT || 3001
 
@@ -84,6 +84,16 @@ function initializeGame(lobby) {
 
 function getNextSaying(game) {
   return getRandomSaying(game.usedSayingIds)
+}
+
+function getRandomSayings(excludeIds = [], count = 5) {
+  const availableSayings = SAYINGS.filter(p => !excludeIds.includes(p.id))
+  const shuffled = [...availableSayings]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count)
 }
 
 function advanceToNextPhase(game) {
@@ -288,7 +298,7 @@ function calculateResults(game) {
   
   game.roundScoring = roundScoring
   
-  const winner = game.players.find(p => p.score >= 20)
+    const winner = game.players.find(p => p.score >= 20)
   if (winner) {
     game.winner = winner
     console.log(`Game winner found: ${winner.nickname}`)
@@ -405,6 +415,9 @@ function handleMessage(ws, data) {
       break
     case 'recycle_saying':
       handleRecycleSaying(ws, data)
+      break
+    case 'request_sayings':
+      handleRequestSayings(ws, data)
       break
     case 'select_saying':
       handleSelectSaying(ws, data)
@@ -640,6 +653,22 @@ function handleRecycleSaying(ws, data) {
   }, 3000) // Show notification for 3 seconds before updating game
 }
 
+function handleRequestSayings(ws, data) {
+  const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
+  if (!client) return
+
+  const [playerId] = client
+  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'saying_selection')
+
+  if (!game) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
+    return
+  }
+
+  const sayings = getRandomSayings(game.usedSayingIds)
+  sendToPlayer(playerId, { type: 'sayings_options', sayings })
+}
+
 function handleSelectSaying(ws, data) {
   const { sayingId } = data
   const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
@@ -653,7 +682,12 @@ function handleSelectSaying(ws, data) {
     return
   }
   
-  game.selectedSaying = game.candidateSaying
+  const saying = SAYINGS.find(s => s.id === sayingId);
+  if (!saying) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Saying not found' }))
+      return
+  }
+  game.selectedSaying = saying;
   game.usedSayingIds.push(sayingId)
   game.candidateSaying = null
   
@@ -890,7 +924,7 @@ function handleEndGame(ws, data) {
   games.delete(lobby.code)
   
   broadcast(lobby.code, {
-    type: 'lobby_updated',
+    type: 'game_ended',
     lobby
   })
 }
