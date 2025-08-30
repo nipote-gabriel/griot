@@ -21,7 +21,9 @@
       "Bash(git push origin main)",
       "Bash(vercel:*)",
       "Bash(sudo chown:*)",
-      "WebFetch(domain:soothsayer-c2jjee081-gabes-projects-ab8ecd28.vercel.app)"
+      "WebFetch(domain:soothsayer-c2jjee081-gabes-projects-ab8ecd28.vercel.app)",
+      "WebFetch(domain:soothsayer-3o7htr4xg-gabes-projects-ab8ecd28.vercel.app)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,8 +1,17 @@
 import { WebSocketServer } from 'ws'
+import { createServer } from 'http'
 import { getRandomSaying } from './phrases.js'
 
 const PORT = process.env.PORT || 3001
-const wss = new WebSocketServer({ port: PORT })
+
+// Create HTTP server
+const server = createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Soothsayer WebSocket Server is running!')
+})
+
+// Create WebSocket server attached to HTTP server
+const wss = new WebSocketServer({ server })
 
 const lobbies = new Map()
 const games = new Map()
@@ -760,4 +769,7 @@ function handleEndGame(ws, data) {
   })
 }
 
-console.log(`WebSocket server running on port ${PORT}`)
+// Start the server
+server.listen(PORT, () => {
+  console.log(`WebSocket server running on port ${PORT}`)
+})
