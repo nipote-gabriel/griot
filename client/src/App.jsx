@@ -207,6 +207,24 @@ function App() {
     setShowHomeConfirm(false)
   }
 
+  const moveAnswerUp = (index) => {
+    if (index > 0) {
+      const newOrder = [...answerOrder]
+      const [item] = newOrder.splice(index, 1)
+      newOrder.splice(index - 1, 0, item)
+      setAnswerOrder(newOrder)
+    }
+  }
+
+  const moveAnswerDown = (index) => {
+    if (index < answerOrder.length - 1) {
+      const newOrder = [...answerOrder]
+      const [item] = newOrder.splice(index, 1)
+      newOrder.splice(index + 1, 0, item)
+      setAnswerOrder(newOrder)
+    }
+  }
+
   const handleRecycleSaying = () => {
     if (gameState === 'game') {
       send({ type: 'recycle_saying' })
@@ -343,7 +361,11 @@ function App() {
                   maxLength={3}
                   className="lobby-code-input"
                 />
-                <button onClick={joinLobby} disabled={!ws} className="primary-btn full-width">
+                <button 
+                  onClick={joinLobby} 
+                  disabled={!ws || lobbyCode.trim().length !== 3} 
+                  className="primary-btn full-width"
+                >
                   Join Lobby
                 </button>
               </div>
@@ -433,9 +455,8 @@ function App() {
         <div className="container">
           <div className="lobby-header">
             <button onClick={goBackToHome} className="back-btn">← Back to Home</button>
-            <h2>Lobby {lobby.code}</h2>
+            <p className="lobby-code">Lobby {lobby.code}</p>
           </div>
-          <p className="mode">Mode: {lobby.mode}</p>
           
           <div className="players-list">
             <h3>Players ({lobby.players.length}/8)</h3>
@@ -496,7 +517,7 @@ function App() {
     if (game.phase === 'saying_selection') {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <LocalGameButtons />
             <h2>Pass to Reader</h2>
             <div className="pass-device">
@@ -543,7 +564,7 @@ function App() {
       const currentSaying = sayingOptions[currentSayingIndex]
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <LocalGameButtons />
             <h2>Choose Your Saying</h2>
             <div className="pass-device">
@@ -641,7 +662,7 @@ function App() {
       if (game.submissions.length < nonReaders.length) {
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <LocalGameButtons />
               <h2>Pass to Writer</h2>
               <div className="pass-device">
@@ -709,7 +730,7 @@ function App() {
         // All submissions collected, pass back to reader
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <LocalGameButtons />
               <h2>Pass Back to Reader</h2>
               <div className="pass-device">
@@ -759,7 +780,7 @@ function App() {
     if (game.phase === 'reordering') {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <LocalGameButtons />
             <h2>Arrange the Answers</h2>
             <div className="pass-device">
@@ -794,6 +815,24 @@ function App() {
                     }}
                     onDragEnd={() => setDraggedIndex(null)}
                   >
+                    <div className="mobile-controls">
+                      <button 
+                        className="move-btn" 
+                        onClick={() => moveAnswerUp(index)}
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        ↑
+                      </button>
+                      <button 
+                        className="move-btn" 
+                        onClick={() => moveAnswerDown(index)}
+                        disabled={index === answerOrder.length - 1}
+                        title="Move down"
+                      >
+                        ↓
+                      </button>
+                    </div>
                     <div className="drag-handle">≡</div>
                     <div className="answer-content">
                       <span className="answer-number">{index + 1}.</span>
@@ -830,7 +869,7 @@ function App() {
       if (game.selections.length < game.players.length - 1) {
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <LocalGameButtons />
               <h2>Pass to Voter</h2>
               <div className="voting-progress">
@@ -954,7 +993,7 @@ function App() {
         
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <LocalGameButtons />
               <h2>Results - Round {game.round}</h2>
               
@@ -1120,8 +1159,8 @@ function App() {
     if (currentPhase === 'saying_selection' && isReader) {
       return (
         <div className="app">
-          <GameButtons />
-          <div className="container">
+          <div className="container has-buttons">
+            <GameButtons />
             <h2>Select a Saying</h2>
             <p>Round {game.round} - You are the Reader</p>
             <div className="reader-debug">
@@ -1181,7 +1220,7 @@ function App() {
     if (currentPhase === 'saying_selection' && !isReader) {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Waiting for Reader</h2>
             <p>Round {game.round}</p>
@@ -1210,7 +1249,7 @@ function App() {
     if (currentPhase === 'reading' && isReader) {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Read Aloud</h2>
             <p>Round {game.round}</p>
@@ -1234,7 +1273,7 @@ function App() {
     if (currentPhase === 'reading' && !isReader) {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Reader is Reading...</h2>
             <p>Round {game.round}</p>
@@ -1248,7 +1287,7 @@ function App() {
       if (isReader) {
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <GameButtons />
               <h2>Writers are Writing</h2>
               <p>Round {game.round}</p>
@@ -1276,7 +1315,7 @@ function App() {
         const hasSubmitted = game.submissions.some(s => s.playerId === player.id)
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <GameButtons />
               <h2>Write Your Ending</h2>
               <p>Round {game.round}</p>
@@ -1370,7 +1409,7 @@ function App() {
       
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Arrange the Answers</h2>
             <p>Round {game.round}</p>
@@ -1400,6 +1439,24 @@ function App() {
                   }}
                   onDragEnd={() => setDraggedIndex(null)}
                 >
+                  <div className="mobile-controls">
+                    <button 
+                      className="move-btn" 
+                      onClick={() => moveAnswerUp(index)}
+                      disabled={index === 0}
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button 
+                      className="move-btn" 
+                      onClick={() => moveAnswerDown(index)}
+                      disabled={index === answerOrder.length - 1}
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+                  </div>
                   <div className="drag-handle">≡</div>
                   <div className="answer-content">
                     <span className="answer-number">{index + 1}.</span>
@@ -1428,7 +1485,7 @@ function App() {
     if (currentPhase === 'reorder' && !isReader) {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Reader is Organizing</h2>
             <p>Round {game.round}</p>
@@ -1445,7 +1502,7 @@ function App() {
       if (isReader) {
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <GameButtons />
               <h2>Players are Choosing</h2>
               <p>Round {game.round}</p>
@@ -1477,7 +1534,7 @@ function App() {
         if (hasChosen) {
           return (
             <div className="app">
-              <div className="container">
+              <div className="container has-buttons">
                 <GameButtons />
                 <h2>Waiting for Other Players</h2>
                 <p>Round {game.round}</p>
@@ -1490,7 +1547,7 @@ function App() {
         
         return (
           <div className="app">
-            <div className="container">
+            <div className="container has-buttons">
               <GameButtons />
               <h2>Your Turn to Choose</h2>
               <p>Round {game.round}</p>
@@ -1554,7 +1611,7 @@ function App() {
     if (currentPhase === 'reveal') {
       return (
         <div className="app">
-          <div className="container">
+          <div className="container has-buttons">
             <GameButtons />
             <h2>Results</h2>
             <p>Round {game.round}</p>

@@ -275,7 +275,7 @@ function calculateResults(game) {
   })
   
   // Check if reader gets bonus (3 points if nobody found true answer)
-  const reader = game.players[game.currentReader]
+  const reader = game.players.find(p => p.id === game.currentReader)
   const anyonePickedTrue = game.selections.some(s => s.answerId === 'true')
   if (!anyonePickedTrue) {
     reader.score += 3
@@ -809,21 +809,46 @@ function handleSelectAnswer(ws, data) {
     game
   })
   
-  // Check if all non-readers have voted
+  // Check if all non-readers have voted - CRITICAL FIX
   console.log(`Vote check: ${game.selections.length} votes, ${nonReaders.length} non-readers needed`)
+  console.log(`Current phase: ${game.phase}`)
+  console.log(`Current reader ID: ${game.currentReader}`)
+  console.log(`All players:`, game.players.map(p => `${p.id}:${p.nickname}`))
+  console.log(`Non-readers:`, nonReaders.map(p => `${p.id}:${p.nickname}`))
+  console.log(`Current selections:`, game.selections)
+  
   if (game.selections.length >= nonReaders.length) {
-    console.log(`All players voted (${game.selections.length}/${nonReaders.length}). Advancing phase...`)
+    console.log(`*** ALL PLAYERS VOTED (${game.selections.length}/${nonReaders.length}) - ADVANCING NOW ***`)
     
-    // Immediately advance to reveal phase
+    // DIRECT PHASE ADVANCEMENT - NO FUNCTION CALLS
     game.phase = 'reveal'
     game.phaseStartTime = Date.now()
-    calculateResults(game)
     
-    console.log(`Phase advanced to: ${game.phase}`)
+    // Calculate results directly
+    try {
+      calculateResults(game)
+      console.log(`*** RESULTS CALCULATED - BROADCASTING REVEAL PHASE ***`)
+    } catch (error) {
+      console.error('Error in calculateResults:', error)
+      // Even if calculateResults fails, still advance phase
+    }
+    
+    // Force broadcast immediately
+    console.log(`*** BROADCASTING PHASE: ${game.phase} ***`)
     broadcast(game.lobbyCode, {
       type: 'game_updated',
       game
     })
+    
+    // Double broadcast as safety measure
+    setTimeout(() => {
+      console.log(`*** SAFETY BROADCAST - PHASE: ${game.phase} ***`)
+      broadcast(game.lobbyCode, {
+        type: 'game_updated',
+        game
+      })
+    }, 100)
+    
   } else {
     console.log(`Waiting for more votes: ${game.selections.length}/${nonReaders.length}`)
   }

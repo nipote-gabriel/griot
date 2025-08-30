@@ -913,6 +913,69 @@ button:disabled {
   font-size: 14px;
 }
 
+/* Mobile-friendly reorder controls */
+.mobile-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.move-btn {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  width: 32px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.move-btn:hover:not(:disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
+}
+
+.move-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.move-btn:active:not(:disabled) {
+  background: #dee2e6;
+  transform: scale(0.95);
+}
+
+/* Hide mobile controls on desktop, show drag handle */
+@media (min-width: 768px) {
+  .mobile-controls {
+    display: none;
+  }
+}
+
+/* Show mobile controls on touch devices, hide drag handle */
+@media (max-width: 767px) {
+  .drag-handle {
+    display: none;
+  }
+  
+  .reorder-item {
+    cursor: default;
+  }
+  
+  .reorder-item[draggable] {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+}
+
 /* Game buttons in top corners */
 .game-buttons {
   position: absolute;
