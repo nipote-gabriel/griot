@@ -142,7 +142,7 @@ function shuffleAnswersForReorder(game) {
   
   const trueAnswer = {
     id: 'true',
-    ending: game.selectedPhrase.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
+    ending: game.selectedSaying.trueEnding.replace(/\.+$/, ''), // Remove trailing periods
     isTrue: true
   }
   
@@ -674,17 +674,26 @@ function handleSubmitEnding(ws, data) {
 }
 
 function handleLockRound(ws, data) {
+  console.log('Lock round requested')
   const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
-  if (!client) return
+  if (!client) {
+    console.log('No client found')
+    return
+  }
   
   const [playerId] = client
+  console.log('Player ID:', playerId)
+  
   const game = [...games.values()].find(g => g.currentReader === playerId && (g.phase === 'writing' || g.phase === 'reorder'))
+  console.log('Current reader:', game?.currentReader, 'Phase:', game?.phase, 'Found game:', !!game)
   
   if (!game) {
+    console.log('Not authorized - playerId:', playerId, 'games:', [...games.values()].map(g => ({currentReader: g.currentReader, phase: g.phase})))
     ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
     return
   }
   
+  console.log('Advancing to next phase')
   advanceToNextPhase(game)
 }
 

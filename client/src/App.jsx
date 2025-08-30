@@ -1030,8 +1030,16 @@ function App() {
                 <p className="first-half">{game.candidateSaying.firstHalf}</p>
                 <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
                 
+                <div className="saying-navigation">
+                  <button onClick={requestNextSaying} className="nav-btn">
+                    ← Previous Saying
+                  </button>
+                  <button onClick={requestNextSaying} className="nav-btn">
+                    Next Saying →
+                  </button>
+                </div>
+                
                 <div className="saying-actions">
-                  <button onClick={requestNextSaying}>Next Saying</button>
                   <button onClick={() => selectSaying(game.candidateSaying.id)} className="primary-btn">
                     Select This Saying
                   </button>
