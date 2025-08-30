@@ -519,6 +519,12 @@ function handleKickPlayer(ws, data) {
   }
   
   lobby.players.splice(playerIndex, 1)
+  
+  // Close the kicked player's WebSocket connection
+  const kickedClient = clients.get(playerId)
+  if (kickedClient) {
+    kickedClient.ws.close()
+  }
   clients.delete(playerId)
   
   broadcast(lobby.code, {

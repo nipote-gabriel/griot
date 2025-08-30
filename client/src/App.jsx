@@ -25,6 +25,7 @@ function App() {
   const [showSubmissionConfirm, setShowSubmissionConfirm] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showVoteConfirm, setShowVoteConfirm] = useState(false)
+  const [sayingCounter, setSayingCounter] = useState(1)
 
   const wsRef = useRef(null)
 
@@ -57,6 +58,7 @@ function App() {
           setGame(data.game)
           setGameState('game')
           setMessage('')
+          setSayingCounter(1)
           break
         case 'game_updated':
           setGame(data.game)
@@ -122,6 +124,7 @@ function App() {
   }
 
   const requestNextSaying = () => {
+    setSayingCounter(prev => prev + 1)
     send({ type: 'next_saying' })
   }
 
@@ -154,6 +157,17 @@ function App() {
 
   const kickPlayer = (playerId) => {
     send({ type: 'kick_player', playerId })
+  }
+
+  const goBackToHome = () => {
+    if (ws) {
+      ws.close()
+    }
+    setGameState('lobby')
+    setLobby(null)
+    setPlayer(null)
+    setGame(null)
+    setMessage('')
   }
 
   const addLocalPlayer = () => {
@@ -362,7 +376,10 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h2>Lobby {lobby.code}</h2>
+          <div className="lobby-header">
+            <button onClick={goBackToHome} className="back-btn">← Back to Home</button>
+            <h2>Lobby {lobby.code}</h2>
+          </div>
           <p className="mode">Mode: {lobby.mode}</p>
           
           <div className="players-list">
@@ -469,7 +486,7 @@ function App() {
                 
                 <div className="saying-card">
                   <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
-                  <p className="first-half">{currentSaying.firstHalf}</p>
+                  <p className="first-half">{currentSaying.firstHalf}...</p>
                   <p className="true-ending">...{currentSaying.trueEnding}</p>
                   
                   <button 
@@ -560,8 +577,7 @@ function App() {
                 </div>
                 
                 <div className="saying-card">
-                  <p className="first-half">{game.selectedSaying.firstHalf}</p>
-                  <p className="continuation">...</p>
+                  <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 </div>
 
                 <div className="form-group">
@@ -677,7 +693,7 @@ function App() {
               </div>
               
               <div className="saying-card">
-                <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 <p className="continuation">...</p>
               </div>
 
@@ -750,7 +766,7 @@ function App() {
                 </div>
                 
                 <div className="saying-card">
-                  <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                  <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 </div>
                 
                 <div className="answers-list">
@@ -864,7 +880,7 @@ function App() {
               <h2>Results - Round {game.round}</h2>
               
               <div className="saying-card">
-                <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 <p className="true-ending highlight">...{game.selectedSaying.trueEnding}</p>
               </div>
 
@@ -1017,9 +1033,14 @@ function App() {
             </div>
             
             {game.candidateSaying && (
-              <div className="saying-card">
-                <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
-                <p className="first-half">{game.candidateSaying.firstHalf}</p>
+              <>
+                <div className="saying-counter">
+                  <span>Saying {sayingCounter}</span>
+                </div>
+                
+                <div className="saying-card">
+                  <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
+                <p className="first-half">{game.candidateSaying.firstHalf}...</p>
                 <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
                 
                 <div className="saying-navigation">
@@ -1044,6 +1065,7 @@ function App() {
                   </button>
                 </div>
               </div>
+              </>
             )}
 
             {game.submissions.length > 0 && (
@@ -1068,6 +1090,18 @@ function App() {
               {' '}
               {game.players.find(p => p.id === game.currentReader)?.nickname} is selecting a saying...
             </p>
+
+            <div className="scoreboard">
+              <h3>Current Scores:</h3>
+              {game.players
+                .sort((a, b) => b.score - a.score)
+                .map(p => (
+                  <div key={p.id} className="score-row">
+                    <span>{p.emoji} {p.nickname}</span>
+                    <span className="total-score">{p.score}</span>
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       )
@@ -1081,7 +1115,7 @@ function App() {
             <p>Round {game.round}</p>
             
             <div className="saying-card">
-              <p className="first-half">{game.selectedSaying.firstHalf}</p>
+              <p className="first-half">{game.selectedSaying.firstHalf}...</p>
             </div>
 
             <div className="reading-instructions">
@@ -1117,7 +1151,7 @@ function App() {
               <p>Round {game.round}</p>
               
               <div className="saying-card">
-                <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                <p className="first-half">{game.selectedSaying.firstHalf}...</p>
               </div>
 
               <div className="submissions-status">
@@ -1144,7 +1178,7 @@ function App() {
               <p>Round {game.round}</p>
               
               <div className="saying-card">
-                <p className="first-half">{game.selectedSaying.firstHalf}</p>
+                <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 <p className="continuation">...</p>
               </div>
 
@@ -1237,7 +1271,7 @@ function App() {
             <p>Round {game.round}</p>
             
             <div className="saying-card">
-              <p className="first-half">{game.selectedSaying.firstHalf}</p>
+              <p className="first-half">{game.selectedSaying.firstHalf}...</p>
               <p className="continuation">...</p>
             </div>
 
@@ -1343,8 +1377,7 @@ function App() {
                     <button
                       key={answer.id}
                       className={`answer-button ${isMyAnswer ? 'my-answer' : ''}`}
-                      onClick={() => !isMyAnswer && (setSelectedAnswer(answer), setShowVoteConfirm(true))}
-                      disabled={isMyAnswer}
+                      onClick={() => (setSelectedAnswer(answer), setShowVoteConfirm(true))}
                     >
                       <span className="answer-number">{idx + 1}.</span>
                       <span className="answer-text">...{answer.ending}</span>
@@ -1419,7 +1452,7 @@ function App() {
             <p>Round {game.round}</p>
             
             <div className="saying-card">
-              <p className="first-half">{game.selectedSaying.firstHalf}</p>
+              <p className="first-half">{game.selectedSaying.firstHalf}...</p>
               <p className="true-ending highlight">...{game.selectedSaying.trueEnding}</p>
             </div>
 
