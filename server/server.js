@@ -723,12 +723,18 @@ function handleSelectAnswer(ws, data) {
   
   const [playerId] = client
   const game = [...games.values()].find(g => 
-    g.currentChooser === playerId && 
+    g.players.some(p => p.id === playerId) && 
     g.phase === 'selections'
   )
   
   if (!game) {
-    ws.send(JSON.stringify({ type: 'error', message: 'Not your turn' }))
+    ws.send(JSON.stringify({ type: 'error', message: 'Game not found or not in selection phase' }))
+    return
+  }
+  
+  // Prevent the reader from voting
+  if (game.currentReader === playerId) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Reader cannot vote' }))
     return
   }
   
@@ -751,10 +757,16 @@ function handleSelectAnswer(ws, data) {
   })
   
   const nonReaders = game.players.filter(p => p.id !== game.currentReader)
+  
+  // Broadcast updated game state
+  broadcast(game.lobbyCode, {
+    type: 'game_updated',
+    game
+  })
+  
+  // Check if all non-readers have voted
   if (game.selections.length >= nonReaders.length) {
     advanceToNextPhase(game)
-  } else {
-    advanceChooser(game)
   }
 }
 

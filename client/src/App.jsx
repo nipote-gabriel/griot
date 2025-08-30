@@ -1350,10 +1350,8 @@ function App() {
     }
 
     if (currentPhase === 'selections') {
-      const currentChooser = game.currentChooser
-      const isMyTurn = currentChooser === player?.id
-      const chooserPlayer = game.players.find(p => p.id === currentChooser)
       const hasChosen = game.selections.some(s => s.playerId === player?.id)
+      const nonReaders = game.players.filter(p => p.id !== game.currentReader)
 
       if (isReader) {
         return (
@@ -1361,7 +1359,7 @@ function App() {
             <div className="container">
               <h2>Players are Choosing</h2>
               <p>Round {game.round}</p>
-              <p>Current chooser: {chooserPlayer?.emoji} {chooserPlayer?.nickname}</p>
+              <p>Votes: {game.selections.length}/{nonReaders.length}</p>
               
               <div className="answers-list">
                 {game.orderedAnswers.map((answer, idx) => (
@@ -1372,14 +1370,33 @@ function App() {
                 ))}
               </div>
 
-              <div className="selections-status">
-                <p>Selections: {game.selections.length}/{game.players.length - 1}</p>
+              <div className="voting-status">
+                <h4>Voting Status:</h4>
+                {nonReaders.map(p => (
+                  <div key={p.id} className="voter-status">
+                    {p.emoji} {p.nickname}: {game.selections.some(s => s.playerId === p.id) ? '✅ Voted' : '⏳ Choosing...'}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )
-      } else if (isMyTurn) {
+      } else {
         const mySubmission = game.submissions.find(s => s.playerId === player.id)
+        
+        if (hasChosen) {
+          return (
+            <div className="app">
+              <div className="container">
+                <h2>Waiting for Other Players</h2>
+                <p>Round {game.round}</p>
+                <p>You've made your selection. Waiting for others...</p>
+                <p>Votes: {game.selections.length}/{nonReaders.length}</p>
+              </div>
+            </div>
+          )
+        }
+        
         return (
           <div className="app">
             <div className="container">
@@ -1431,30 +1448,6 @@ function App() {
                 </div>
               )}
 
-            </div>
-          </div>
-        )
-      } else {
-        return (
-          <div className="app">
-            <div className="container">
-              <h2>Waiting for Players</h2>
-              <p>Round {game.round}</p>
-              <p>
-                {hasChosen ? 
-                  `Waiting for others... (${chooserPlayer?.emoji} ${chooserPlayer?.nickname} is choosing)` :
-                  `${chooserPlayer?.emoji} ${chooserPlayer?.nickname} is choosing...`
-                }
-              </p>
-              
-              <div className="answers-list">
-                {game.orderedAnswers.map((answer, idx) => (
-                  <div key={answer.id} className="answer-item">
-                    <span className="answer-number">{idx + 1}.</span>
-                    <span className="answer-text">...{answer.ending}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         )
