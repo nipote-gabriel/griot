@@ -30,7 +30,8 @@
       "WebFetch(domain:ui.shadcn.com)",
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_cmoiFp/**)",
       "Bash(npm run build:*)",
-      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_O9xhhw/**)"
+      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_O9xhhw/**)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { SAYINGS } from './phrases.js'
+// Force deploy after GitHub reconnect
 
 const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧝‍♀️', '🧌', '🧞‍♂️', '🧞‍♀️', '🐉']
 
