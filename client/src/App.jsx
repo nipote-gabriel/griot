@@ -363,7 +363,7 @@ function App() {
                 />
                 <button 
                   onClick={joinLobby} 
-                  disabled={!ws || lobbyCode.trim().length !== 3} 
+                  disabled={!ws || lobbyCode.trim().length !== 3}
                   className="primary-btn full-width"
                 >
                   Join Lobby
