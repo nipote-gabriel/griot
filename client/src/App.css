@@ -34,7 +34,7 @@ body {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem; /* p-6 */
   width: 100%;
-  max-width: 28rem; /* max-w-md */
+  max-width: 40rem; /* wider format */
   min-height: 25rem; /* min-h-96 */
   position: relative;
 }
@@ -911,6 +911,36 @@ button:disabled {
   margin: 16px 0;
   color: #004085;
   font-size: 14px;
+}
+
+/* Saying header with recycle button on left */
+.saying-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.saying-header .mark-used-btn {
+  background: #f8d7da;
+  border: 1px solid #f1aeb5;
+  color: #721c24;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.saying-header .mark-used-btn:hover {
+  background: #f5c2c7;
+  border-color: #e7a6b1;
+}
+
+.saying-header .saying-origin {
+  margin: 0;
+  flex: 1;
 }
 
 /* Mobile-friendly reorder controls */

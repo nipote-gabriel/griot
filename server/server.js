@@ -288,7 +288,7 @@ function calculateResults(game) {
   
   game.roundScoring = roundScoring
   
-  const winner = game.players.find(p => p.score >= 10)
+  const winner = game.players.find(p => p.score >= 20)
   if (winner) {
     game.winner = winner
     console.log(`Game winner found: ${winner.nickname}`)

@@ -330,7 +330,7 @@ function App() {
               </div>
 
               <div className="form-group">
-                <label>Pick your emoji:</label>
+                <label>Pick your Avatar:</label>
                 <div className="emoji-grid">
                   {EMOJI_AVATARS.map((emoji) => {
                     const isUsed = lobby?.players?.some(p => p.emoji === emoji) || false
@@ -390,7 +390,7 @@ function App() {
               </div>
 
               <div className="form-group">
-                <label>Pick emoji for this player:</label>
+                <label>Pick Avatar for this player:</label>
                 <div className="emoji-grid">
                   {EMOJI_AVATARS.map((emoji) => {
                     const isUsed = localPlayers.some(p => p.emoji === emoji)
@@ -580,42 +580,43 @@ function App() {
                 </div>
                 
                 <div className="saying-card">
-                  <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
+                  <div className="saying-header">
+                    <button 
+                      onClick={() => {
+                        // Mark current saying as used and replace with new one
+                        const newUsedIds = [...game.usedSayingIds, currentSaying.id]
+                        
+                        // Get available sayings excluding already used and currently selected ones
+                        const currentlySelected = sayingOptions.map(p => p.id)
+                        const availableSayings = SAYINGS.filter(p => 
+                          !newUsedIds.includes(p.id) && !currentlySelected.includes(p.id)
+                        )
+                        
+                        if (availableSayings.length === 0) {
+                          setMessage("All available sayings have been used. Please start a new game.")
+                          return
+                        }
+                        
+                        // Get a random replacement saying
+                        const randomIndex = Math.floor(Math.random() * availableSayings.length)
+                        const replacementSaying = availableSayings[randomIndex]
+                        
+                        // Replace the current saying with the new one
+                        const newOptions = [...sayingOptions]
+                        newOptions[currentSayingIndex] = replacementSaying
+                        
+                        setSayingOptions(newOptions)
+                        setGame({...game, usedSayingIds: newUsedIds})
+                      }}
+                      className="mark-used-btn"
+                      title="Mark this saying as already known"
+                    >
+                      ♻️
+                    </button>
+                    <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
+                  </div>
                   <p className="first-half">{currentSaying.firstHalf}...</p>
                   <p className="true-ending">...{currentSaying.trueEnding}</p>
-                  
-                  <button 
-                    onClick={() => {
-                      // Mark current saying as used and replace with new one
-                      const newUsedIds = [...game.usedSayingIds, currentSaying.id]
-                      
-                      // Get available sayings excluding already used and currently selected ones
-                      const currentlySelected = sayingOptions.map(p => p.id)
-                      const availableSayings = SAYINGS.filter(p => 
-                        !newUsedIds.includes(p.id) && !currentlySelected.includes(p.id)
-                      )
-                      
-                      if (availableSayings.length === 0) {
-                        setMessage("All available sayings have been used. Please start a new game.")
-                        return
-                      }
-                      
-                      // Get a random replacement saying
-                      const randomIndex = Math.floor(Math.random() * availableSayings.length)
-                      const replacementSaying = availableSayings[randomIndex]
-                      
-                      // Replace the current saying with the new one
-                      const newOptions = [...sayingOptions]
-                      newOptions[currentSayingIndex] = replacementSaying
-                      
-                      setSayingOptions(newOptions)
-                      setGame({...game, usedSayingIds: newUsedIds})
-                    }}
-                    className="mark-used-btn"
-                    title="Mark this saying as already known"
-                  >
-                    ♻️
-                  </button>
                 </div>
                 
                 <div className="saying-navigation">
