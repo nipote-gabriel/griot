@@ -219,17 +219,55 @@ function calculateResults(game) {
     }
   })
   
+  // Group identical answers for point splitting
+  const answerGroups = new Map()
   playerAnswers.forEach(answer => {
-    const author = game.players.find(p => p.id === answer.playerId)
-    // Count votes excluding self-votes
-    const votes = game.selections.filter(s => s.answerId === answer.id && s.playerId !== author.id).length
-    if (votes > 0) {
-      const bluffPoints = votes * 2
-      author.score += bluffPoints
+    const cleanAnswer = answer.ending.toLowerCase().trim()
+    if (!answerGroups.has(cleanAnswer)) {
+      answerGroups.set(cleanAnswer, [])
+    }
+    answerGroups.get(cleanAnswer).push(answer)
+  })
+  
+  // Score each answer group
+  answerGroups.forEach(answersInGroup => {
+    // Count total votes for this answer group
+    const totalVotes = answersInGroup.reduce((total, answer) => {
+      const author = game.players.find(p => p.id === answer.playerId)
+      const votes = game.selections.filter(s => s.answerId === answer.id && s.playerId !== author.id).length
+      return total + votes
+    }, 0)
+    
+    if (totalVotes > 0) {
+      const totalPoints = totalVotes * 2
+      const pointsPerAuthor = Math.floor(totalPoints / answersInGroup.length)
+      
+      answersInGroup.forEach(answer => {
+        const author = game.players.find(p => p.id === answer.playerId)
+        author.score += pointsPerAuthor
+        roundScoring.push({
+          player: author,
+          points: pointsPerAuthor,
+          reason: answersInGroup.length > 1 
+            ? `Split ${totalPoints} points with ${answersInGroup.length - 1} identical answer${answersInGroup.length > 2 ? 's' : ''}`
+            : `${totalVotes} player${totalVotes > 1 ? 's' : ''} picked your bluff`
+        })
+      })
+    }
+  })
+  
+  // Check for exact matches with true answer (5 point bonus)
+  const trueEnding = game.selectedSaying.trueEnding.replace(/\.+$/, '').toLowerCase().trim()
+  
+  playerAnswers.forEach(answer => {
+    const cleanAnswer = answer.ending.toLowerCase().trim()
+    if (cleanAnswer === trueEnding) {
+      const author = game.players.find(p => p.id === answer.playerId)
+      author.score += 5
       roundScoring.push({
         player: author,
-        points: bluffPoints,
-        reason: `${votes} player${votes > 1 ? 's' : ''} picked your bluff`
+        points: 5,
+        reason: 'Exact match with true answer'
       })
     }
   })
@@ -700,6 +738,12 @@ function handleSelectAnswer(ws, data) {
     return
   }
   
+  // Check if player has already made a selection
+  const existingSelection = game.selections.find(s => s.playerId === playerId)
+  if (existingSelection) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Already voted' }))
+    return
+  }
   
   game.selections.push({
     playerId,

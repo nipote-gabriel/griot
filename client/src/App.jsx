@@ -80,6 +80,14 @@ function App() {
     socket.onclose = () => {
       console.log('Disconnected from server')
       setWs(null)
+      // Return to home screen if disconnected (e.g., kicked from lobby)
+      if (gameState !== 'lobby') {
+        setGameState('lobby')
+        setLobby(null)
+        setPlayer(null)
+        setGame(null)
+        setMessage('Connection lost. Returned to home.')
+      }
     }
 
     return () => {
@@ -289,19 +297,17 @@ function App() {
 
               <div className="form-group">
                 <label>Join existing lobby:</label>
-                <div className="lobby-join-section">
-                  <input
-                    type="text"
-                    value={lobbyCode}
-                    onChange={(e) => setLobbyCode(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                    placeholder="000"
-                    maxLength={3}
-                    className="lobby-code-input"
-                  />
-                  <button onClick={joinLobby} disabled={!ws} className="join-lobby-btn">
-                    Join Lobby
-                  </button>
-                </div>
+                <input
+                  type="text"
+                  value={lobbyCode}
+                  onChange={(e) => setLobbyCode(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                  placeholder="000"
+                  maxLength={3}
+                  className="lobby-code-input"
+                />
+                <button onClick={joinLobby} disabled={!ws} className="join-lobby-btn full-width">
+                  Join Lobby
+                </button>
               </div>
 
               <div className="divider">OR</div>
@@ -411,7 +417,7 @@ function App() {
             ))}
           </div>
 
-          {isHost && lobby.players.length >= 2 && (
+          {isHost && lobby.players.length >= 3 && (
             <button onClick={startGame} className="primary-btn">
               Start Game
             </button>
