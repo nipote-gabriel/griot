@@ -1,5 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "client/dist",
-  "installCommand": "npm run install:all"
+  "buildCommand": "npm run install:all && npm run build",
+  "outputDirectory": "client/dist"
 }
