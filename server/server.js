@@ -398,6 +398,9 @@ function handleMessage(ws, data) {
     case 'next_saying':
       handleNextSaying(ws, data)
       break
+    case 'recycle_saying':
+      handleRecycleSaying(ws, data)
+      break
     case 'select_saying':
       handleSelectSaying(ws, data)
       break
@@ -593,6 +596,43 @@ function handleNextSaying(ws, data) {
     type: 'game_updated',
     game
   })
+}
+
+function handleRecycleSaying(ws, data) {
+  const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
+  if (!client) return
+  
+  const [playerId] = client
+  const game = [...games.values()].find(g => 
+    g.players.some(p => p.id === playerId) && 
+    (g.phase === 'saying_selection' || g.phase === 'writing' || g.phase === 'reorder')
+  )
+  
+  if (!game) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Cannot recycle at this time' }))
+    return
+  }
+  
+  // Notify all players about the recycle
+  broadcast(game.lobbyCode, {
+    type: 'recycle_notification',
+    message: 'A player knows this saying already. We\'re going to pick a new saying'
+  })
+  
+  // Reset game to saying selection phase
+  game.phase = 'saying_selection'
+  game.candidateSaying = getNextSaying(game)
+  game.selectedSaying = null
+  game.submissions = []
+  game.orderedAnswers = []
+  game.selections = []
+  
+  setTimeout(() => {
+    broadcast(game.lobbyCode, {
+      type: 'game_updated',
+      game
+    })
+  }, 3000) // Show notification for 3 seconds before updating game
 }
 
 function handleSelectSaying(ws, data) {

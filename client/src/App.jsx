@@ -26,6 +26,9 @@ function App() {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [showVoteConfirm, setShowVoteConfirm] = useState(false)
   const [sayingCounter, setSayingCounter] = useState(1)
+  const [showHomeConfirm, setShowHomeConfirm] = useState(false)
+  const [showInfoDialog, setShowInfoDialog] = useState(false)
+  const [showRecycleConfirm, setShowRecycleConfirm] = useState(false)
 
   const wsRef = useRef(null)
 
@@ -70,6 +73,10 @@ function App() {
           break
         case 'game_updated':
           setGame(data.game)
+          break
+        case 'recycle_notification':
+          setMessage(data.message)
+          setTimeout(() => setMessage(''), 3000)
           break
         case 'error':
           setMessage(data.message)
@@ -182,6 +189,19 @@ function App() {
     setGame(null)
     setMessage('')
     // Don't close WebSocket - keep connection active for immediate use
+  }
+
+  const handleHomeConfirm = () => {
+    if (ws) {
+      ws.close()
+    }
+    goBackToHome()
+    setShowHomeConfirm(false)
+  }
+
+  const handleRecycleSaying = () => {
+    send({ type: 'recycle_saying' })
+    setShowRecycleConfirm(false)
   }
 
   const addLocalPlayer = () => {
@@ -305,7 +325,7 @@ function App() {
                   maxLength={3}
                   className="lobby-code-input"
                 />
-                <button onClick={joinLobby} disabled={!ws} className="join-lobby-btn full-width">
+                <button onClick={joinLobby} disabled={!ws} className="primary-btn full-width">
                   Join Lobby
                 </button>
               </div>
@@ -536,7 +556,7 @@ function App() {
                     className="mark-used-btn"
                     title="Mark this saying as already known"
                   >
-                    Mark as Used
+                    ♻️ Recycle
                   </button>
                 </div>
                 
@@ -1037,9 +1057,27 @@ function App() {
     const isReader = player?.id === game.currentReader
     const currentPhase = game.phase
 
+    // Top corner buttons for game
+    const GameButtons = () => (
+      <div className="game-buttons">
+        <button onClick={() => setShowHomeConfirm(true)} className="corner-btn home-btn" title="Go Home">
+          🏠
+        </button>
+        <button onClick={() => setShowInfoDialog(true)} className="corner-btn info-btn" title="Game Info">
+          ℹ️
+        </button>
+        {(currentPhase === 'saying_selection' || currentPhase === 'writing' || currentPhase === 'reorder') && (
+          <button onClick={() => setShowRecycleConfirm(true)} className="corner-btn recycle-btn" title="Recycle Saying">
+            ♻️
+          </button>
+        )}
+      </div>
+    )
+
     if (currentPhase === 'saying_selection' && isReader) {
       return (
         <div className="app">
+          <GameButtons />
           <div className="container">
             <h2>Select a Saying</h2>
             <p>Round {game.round} - You are the Reader</p>
@@ -1075,7 +1113,7 @@ function App() {
                     className="mark-used-btn"
                     title="Mark this saying as already known"
                   >
-                    Mark as Used
+                    ♻️ Recycle
                   </button>
                   <button onClick={() => selectSaying(game.candidateSaying.id)} className="primary-btn">
                     Select This Saying
@@ -1092,6 +1130,64 @@ function App() {
               </div>
             )}
           </div>
+
+          {/* Confirmation Dialogs */}
+          {showHomeConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Leave Game?</h3>
+                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>Are you sure you want to leave the game and go home? You will be removed from the lobby.</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowHomeConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleHomeConfirm} className="confirm-btn">Leave Game</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showInfoDialog && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Game Info</h3>
+                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
+                </div>
+                <div className="info-content">
+                  <p><strong>Lobby:</strong> {lobby?.code}</p>
+                  <div className="players-scores">
+                    <h4>Players & Scores:</h4>
+                    {game.players
+                      .sort((a, b) => b.score - a.score)
+                      .map(p => (
+                        <div key={p.id} className="score-row">
+                          <span>{p.emoji} {p.nickname}</span>
+                          <span className="score">{p.score}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showRecycleConfirm && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Recycle Saying?</h3>
+                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
+                </div>
+                <p>This will notify all players that someone knows this saying and pick a new one. Continue?</p>
+                <div className="dialog-actions">
+                  <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
+                  <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )
     }
@@ -1402,6 +1498,11 @@ function App() {
             <div className="container">
               <h2>Your Turn to Choose</h2>
               <p>Round {game.round}</p>
+              
+              <div className="saying-card">
+                <p className="first-half">{game.selectedSaying.firstHalf}...</p>
+              </div>
+              
               <p>Pick the answer you think is the TRUE one:</p>
               
               <div className="answers-list">
