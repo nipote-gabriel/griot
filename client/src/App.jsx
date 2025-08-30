@@ -296,7 +296,7 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>Soothsayer v2.0</h1>
+          <h1>Soothsayer</h1>
           
           <div className="form-group">
             <label>Game Mode:</label>
@@ -1177,9 +1177,18 @@ function App() {
                 </div>
                 
                 <div className="saying-card">
-                  <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
-                <p className="first-half">{game.candidateSaying.firstHalf}...</p>
-                <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
+                  <div className="saying-header">
+                    <button 
+                      onClick={requestNextSaying}
+                      className="mark-used-btn"
+                      title="Mark this saying as already known"
+                    >
+                      ♻️
+                    </button>
+                    <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
+                  </div>
+                  <p className="first-half">{game.candidateSaying.firstHalf}...</p>
+                  <p className="true-ending">...{game.candidateSaying.trueEnding}</p>
                 
                 <div className="saying-navigation">
                   <button onClick={requestNextSaying} className="nav-btn">
@@ -1191,13 +1200,6 @@ function App() {
                 </div>
                 
                 <div className="saying-actions">
-                  <button 
-                    onClick={requestNextSaying}
-                    className="mark-used-btn"
-                    title="Mark this saying as already known"
-                  >
-                    ♻️
-                  </button>
                   <button onClick={() => selectSaying(game.candidateSaying.id)} className="primary-btn">
                     Select This Saying
                   </button>
