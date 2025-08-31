@@ -102,12 +102,21 @@ export const SAYINGS = [
 ];
 
 export function getRandomSaying(excludeIds = []) {
-  const availableSayings = SAYINGS.filter(p => !excludeIds.includes(p.id))
-  if (availableSayings.length === 0) {
+  // Ensure we have sayings to work with
+  if (!SAYINGS || SAYINGS.length === 0) {
     return null
   }
   
-  // Use cryptographically strong randomness for better distribution
+  const availableSayings = SAYINGS.filter(p => !excludeIds.includes(p.id))
+  
+  // If all sayings are used, return a random one from the full set
+  if (availableSayings.length === 0) {
+    console.log('All sayings have been used, selecting from full set')
+    const randomIndex = Math.floor(Math.random() * SAYINGS.length)
+    return SAYINGS[randomIndex]
+  }
+  
+  // Use random selection from available sayings
   const randomIndex = Math.floor(Math.random() * availableSayings.length)
   return availableSayings[randomIndex]
 }

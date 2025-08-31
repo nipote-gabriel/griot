@@ -84,7 +84,13 @@ function initializeGame(lobby) {
 }
 
 function getNextSaying(game) {
-  return getRandomSaying(game.usedSayingIds)
+  const saying = getRandomSaying(game.usedSayingIds)
+  // If all sayings have been used, reset the used sayings list
+  if (saying && game.usedSayingIds.length >= SAYINGS.length) {
+    console.log('All sayings exhausted, resetting used sayings list')
+    game.usedSayingIds = []
+  }
+  return saying
 }
 
 function getRandomSayings(excludeIds = [], count = 5) {
@@ -341,7 +347,9 @@ function advanceToNextRound(game) {
 
 function resetRound(game) {
   const saying = getNextSaying(game);
+  // The saying should never be null now since we reset usedSayingIds when exhausted
   if (!saying) {
+    console.error('No saying available - this should not happen');
     return false;
   }
   game.phase = 'saying_selection';
@@ -606,12 +614,15 @@ function handleStartGame(ws, data) {
   }
   
   const game = initializeGame(lobby)
-  if (!game.candidateSaying) {
-    broadcast(lobby.code, { type: 'no_more_sayings' });
-    return;
-  }
   game.candidateSaying = getNextSaying(game)
   game.mode = lobby.mode
+  
+  // This should never happen with our new logic, but keep as safety
+  if (!game.candidateSaying) {
+    console.error('Could not get initial saying for game');
+    ws.send(JSON.stringify({ type: 'error', message: 'Could not start game - no sayings available' }))
+    return;
+  }
   
   broadcast(lobby.code, {
     type: 'game_started',
@@ -995,6 +1006,13 @@ function handleNextRound(ws, data) {
   
   advanceToNextRound(game)
   game.candidateSaying = getNextSaying(game)
+  
+  // This should never happen with our new logic, but keep as safety
+  if (!game.candidateSaying) {
+    console.error('Could not get saying for next round');
+    ws.send(JSON.stringify({ type: 'error', message: 'Could not advance to next round - no sayings available' }))
+    return;
+  }
   
   broadcast(game.lobbyCode, {
     type: 'game_updated',
