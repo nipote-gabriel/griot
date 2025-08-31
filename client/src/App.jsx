@@ -32,6 +32,7 @@ function App() {
   const [showRecycleConfirm, setShowRecycleConfirm] = useState(false)
   const [onlineSayingOptions, setOnlineSayingOptions] = useState([])
   const [currentOnlineSayingIndex, setCurrentOnlineSayingIndex] = useState(0)
+  const [countdown, setCountdown] = useState(null)
 
   const wsRef = useRef(null)
   const gameStateRef = useRef(gameState)
@@ -78,6 +79,11 @@ function App() {
           setGameState('waiting')
           setLobby(data.lobby)
           break
+        case 'game_ended_by_disconnect':
+          setGame(null);
+          setGameState('lobby');
+          setMessage(data.message);
+          break;
         case 'game_started':
           setGame(data.game)
           setGameState('game')
@@ -98,6 +104,9 @@ function App() {
           setOnlineSayingOptions(data.sayings)
           setCurrentOnlineSayingIndex(0)
           break
+        case 'no_more_sayings':
+          setMessage("You have used all the sayings! Please start a new game to continue.");
+          break;
       }
     }
 
@@ -124,6 +133,23 @@ function App() {
       send({ type: 'request_sayings' })
     }
   }, [gameState, game, player, onlineSayingOptions])
+
+  useEffect(() => {
+    if (game?.timer) {
+      const interval = setInterval(() => {
+        const remaining = Math.round((game.timer.endTime - Date.now()) / 1000);
+        if (remaining > 0) {
+          setCountdown(remaining);
+        } else {
+          setCountdown(0);
+          clearInterval(interval);
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      setCountdown(null);
+    }
+  }, [game?.timer]);
 
   const send = (data) => {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -344,7 +370,7 @@ function App() {
                   <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
                 </div>
                 <div className="info-content">
-                  <p><strong>Lobby:</strong> {lobby?.code}</p>
+                  <h4 className="lobby-info-label"><strong>Lobby:</strong> {lobby?.code}</h4>
                   <div className="players-scores">
                     <h4>Players & Scores:</h4>
                     {game?.players
@@ -627,10 +653,15 @@ function App() {
             ))}
           </div>
 
-          {isHost && lobby.players.length >= 3 && (
-            <button onClick={startGame} className="primary-btn">
-              Start Game
-            </button>
+          {isHost && (
+            <>
+              <button onClick={startGame} className="primary-btn" disabled={lobby.players.length < 3}>
+                Start Game
+              </button>
+              {lobby.players.length < 3 && (
+                <p className="message error">Minimum 3 Players to Start Game</p>
+              )}
+            </>
           )}
 
           {!isHost && (
@@ -658,11 +689,9 @@ function App() {
           <button onClick={() => setShowInfoDialog(true)} className="corner-btn info-btn" title="Game Info">
             ℹ️
           </button>
-          {(game.phase === 'saying_selection' || game.phase === 'writing' || game.phase === 'reorder') && (
-            <button onClick={() => setShowRecycleConfirm(true)} className="corner-btn recycle-btn" title="Recycle Saying">
-              ♻️
-            </button>
-          )}
+          <button onClick={() => setShowRecycleConfirm(true)} className="corner-btn recycle-btn" title="Recycle Saying" disabled={game.phase !== 'writing'}>
+            ♻️
+          </button>
         </div>
         <RenderDialogs />
       </>
@@ -729,10 +758,6 @@ function App() {
               </div>
               
               <div className="saying-browser">
-                <div className="saying-counter">
-                  <span>Saying {currentSayingIndex + 1} of {sayingOptions.length}</span>
-                </div>
-                
                 <div className="saying-card">
                   <div className="saying-header">
                     <button 
@@ -765,14 +790,13 @@ function App() {
                       className="mark-used-btn"
                       title="Mark this saying as already known"
                     >
-                      ♻️
+                      🗑️
                     </button>
                     <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
                   </div>
                   <p className="first-half">{currentSaying.firstHalf}...</p>
                   <p className="true-ending">...{currentSaying.trueEnding}</p>
                 </div>
-                
                 <div className="saying-navigation">
                   <button 
                     onClick={() => setCurrentSayingIndex((currentSayingIndex - 1 + sayingOptions.length) % sayingOptions.length)}
@@ -787,6 +811,10 @@ function App() {
                   >
                     Next →
                   </button>
+                </div>
+
+                <div className="saying-counter">
+                  <span>Saying {currentSayingIndex + 1} of {sayingOptions.length}</span>
                 </div>
                 
                 <button 
@@ -1257,7 +1285,7 @@ function App() {
                     setGame(null)
                     setLocalPlayers([])
                   }} className="primary-btn">
-                    Back to Menu
+                    Return Home
                   </button>
                 </div>
               ) : (
@@ -1304,11 +1332,9 @@ function App() {
           <button onClick={() => setShowInfoDialog(true)} className="corner-btn info-btn" title="Game Info">
             ℹ️
           </button>
-          {(currentPhase === 'saying_selection' || currentPhase === 'writing' || currentPhase === 'reorder') && (
-            <button onClick={() => setShowRecycleConfirm(true)} className="corner-btn recycle-btn" title="Recycle Saying">
-              ♻️
-            </button>
-          )}
+          <button onClick={() => setShowRecycleConfirm(true)} className="corner-btn recycle-btn" title="Recycle Saying" disabled={currentPhase !== 'writing'}>
+            ♻️
+          </button>
         </div>
         <RenderDialogs />
       </>
@@ -1329,10 +1355,6 @@ function App() {
             
                         {onlineSayingOptions.length > 0 ? (
               <>
-                <div className="saying-counter">
-                  <span>Saying {currentOnlineSayingIndex + 1} of {onlineSayingOptions.length}</span>
-                </div>
-                
                 <div className="saying-card">
                   <div className="saying-header">
                     <button 
@@ -1343,13 +1365,13 @@ function App() {
                       className="mark-used-btn"
                       title="Get new sayings"
                     >
-                      ♻️
+                      🗑️
                     </button>
                     <p className="saying-origin">There is an old {onlineSayingOptions[currentOnlineSayingIndex].origin || 'ancient'} saying:</p>
                   </div>
                   <p className="first-half">{onlineSayingOptions[currentOnlineSayingIndex].firstHalf}...</p>
                   <p className="true-ending">...{onlineSayingOptions[currentOnlineSayingIndex].trueEnding}</p>
-                
+                </div>
                 <div className="saying-navigation">
                   <button onClick={() => setCurrentOnlineSayingIndex((currentOnlineSayingIndex - 1 + onlineSayingOptions.length) % onlineSayingOptions.length)} className="nav-btn">
                     ← Previous Saying
@@ -1358,13 +1380,16 @@ function App() {
                     Next Saying →
                   </button>
                 </div>
+
+                <div className="saying-counter">
+                  <span>Saying {currentOnlineSayingIndex + 1} of {onlineSayingOptions.length}</span>
+                </div>
                 
                 <div className="saying-actions">
                   <button onClick={() => selectSaying(onlineSayingOptions[currentOnlineSayingIndex].id)} className="primary-btn">
                     Select This Saying
                   </button>
                 </div>
-              </div>
               </>
             ) : game.candidateSaying && (
               <>
@@ -1379,7 +1404,7 @@ function App() {
                       className="mark-used-btn"
                       title="Mark this saying as already known"
                     >
-                      ♻️
+                      🗑️
                     </button>
                     <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
                   </div>
@@ -1497,16 +1522,32 @@ function App() {
 
               <div className="submissions-status">
                 <p>Submissions: {game.submissions.length}/{game.players.length - 1}</p>
-                {game.submissions.map((sub, idx) => (
-                  <div key={idx} className="submission-preview">
-                    "{sub.ending}"
-                  </div>
-                ))}
+                {game.submissions.map((sub, idx) => {
+                  const author = game.players.find(p => p.id === sub.playerId);
+                  return (
+                    <div key={idx} className="submission-preview">
+                      <strong>{author.nickname}:</strong> "{sub.ending}"
+                    </div>
+                  )
+                })}
+                <h4>Remaining players:</h4>
+                <ul>
+                  {game.players
+                    .filter(p => p.id !== game.currentReader && !game.submissions.some(s => s.playerId === p.id))
+                    .map(p => (
+                      <li key={p.id}>{p.emoji} {p.nickname}</li>
+                    ))
+                  }
+                </ul>
               </div>
 
-              <button onClick={lockRound} className="primary-btn">
-                Lock Round
-              </button>
+              {countdown !== null ? (
+                <div className="timer">Time remaining: {countdown}s</div>
+              ) : (
+                <button onClick={() => send({ type: 'start_timer' })} className="primary-btn">
+                  Start Timer (30s)
+                </button>
+              )}
             </div>
           </div>
         )
@@ -1522,6 +1563,19 @@ function App() {
               <div className="saying-card">
                 <p className="first-half">{game.selectedSaying.firstHalf}...</p>
                 <p className="continuation">...</p>
+              </div>
+
+              {countdown !== null && <div className="timer">Time remaining: {countdown}s</div>}
+
+              <div className="submissions-status">
+                <p>Submissions: {game.submissions.length}/{game.players.length - 1}</p>
+                <ul>
+                  {game.players.filter(p => p.id !== game.currentReader).map(p => (
+                    <li key={p.id}>
+                      {p.emoji} {p.nickname} {game.submissions.some(s => s.playerId === p.id) ? '✅' : '...'}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <div className="form-group">
@@ -1724,12 +1778,50 @@ function App() {
                   </div>
                 ))}
               </div>
+
+              <div className="voting-results">
+                <h4>Votes:</h4>
+                {game.selections.map(selection => {
+                  const voter = game.players.find(p => p.id === selection.playerId);
+                  const answer = game.orderedAnswers.find(a => a.id === selection.answerId);
+                  return (
+                    <div key={selection.playerId}>
+                      {voter.emoji} {voter.nickname} voted for: "...{answer.ending}"
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )
       } else {
         const mySubmission = game.submissions.find(s => s.playerId === player.id)
         
+        if (player.id !== game.currentChooser) {
+          return (
+            <div className="app">
+              <div className="container has-buttons">
+                <GameButtons />
+                <h2>Waiting for your turn to vote...</h2>
+                <p>It is currently {game.players.find(p => p.id === game.currentChooser)?.nickname}'s turn to vote.</p>
+
+                <div className="voting-results">
+                  <h4>Votes:</h4>
+                  {game.selections.map(selection => {
+                    const voter = game.players.find(p => p.id === selection.playerId);
+                    const answer = game.orderedAnswers.find(a => a.id === selection.answerId);
+                    return (
+                      <div key={selection.playerId}>
+                        {voter.emoji} {voter.nickname} voted for: "...{answer.ending}"
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        }
+
         if (hasChosen) {
           return (
             <div className="app">
@@ -1862,11 +1954,9 @@ function App() {
             {game.winner ? (
               <div className="game-end">
                 <h2>🎉 {game.winner.emoji} {game.winner.nickname} Wins! 🎉</h2>
-                {isReader && (
-                  <button onClick={endGame} className="primary-btn">
-                    End Game
-                  </button>
-                )}
+                <button onClick={goBackToHome} className="primary-btn">
+                  Return Home
+                </button>
               </div>
             ) : (
               <div className="next-round">

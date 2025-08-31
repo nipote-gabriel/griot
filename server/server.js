@@ -75,7 +75,8 @@ function initializeGame(lobby) {
     revealResults: [],
     roundScoring: [],
     winner: null,
-    nextReader: null
+    nextReader: null,
+    timer: null
   }
   
   games.set(lobby.code, game)
@@ -143,6 +144,13 @@ function advanceToNextPhase(game) {
   })
 }
 
+function endGame(lobbyCode, message) {
+  if (games.has(lobbyCode)) {
+    games.delete(lobbyCode);
+    broadcast(lobbyCode, { type: 'game_ended', message });
+  }
+}
+
 function shuffleAnswersForReorder(game) {
   const playerSubmissions = game.submissions.map(sub => ({
     id: sub.id,
@@ -168,8 +176,9 @@ function shuffleAnswersForReorder(game) {
 }
 
 function setupSelections(game) {
-  const nonReaders = game.players.filter(p => p.id !== game.currentReader)
-  game.currentChooser = nonReaders[0].id
+  const readerIndex = game.players.findIndex(p => p.id === game.currentReader)
+  const nextPlayerIndex = (readerIndex + 1) % game.players.length
+  game.currentChooser = game.players[nextPlayerIndex].id
   game.selections = []
 }
 
@@ -327,6 +336,26 @@ function advanceToNextRound(game) {
   game.revealResults = []
   game.roundScoring = []
   game.nextReader = null
+  game.timer = null
+}
+
+function resetRound(game) {
+  const saying = getNextSaying(game);
+  if (!saying) {
+    return false;
+  }
+  game.phase = 'saying_selection';
+  game.candidateSaying = saying;
+  game.selectedSaying = null;
+  game.submissions = [];
+  game.orderedAnswers = [];
+  game.selections = [];
+  game.currentChooser = null;
+  game.phaseStartTime = Date.now();
+  game.revealResults = [];
+  game.roundScoring = [];
+  game.timer = null;
+  return true;
 }
 
 function advanceChooser(game) {
@@ -361,37 +390,57 @@ wss.on('connection', (ws) => {
   })
   
   ws.on('close', () => {
-    console.log('Client disconnected')
-    
+    console.log('Client disconnected');
+    let disconnectedPlayerId = null;
+
     for (const [clientId, client] of clients.entries()) {
       if (client.ws === ws) {
-        clients.delete(clientId)
-        
-        for (const [lobbyCode, lobby] of lobbies.entries()) {
-          const playerIndex = lobby.players.findIndex(p => p.id === clientId)
-          if (playerIndex !== -1) {
-            lobby.players.splice(playerIndex, 1)
-            
-            if (lobby.players.length === 0) {
-              lobbies.delete(lobbyCode)
-              games.delete(lobbyCode)
-            } else {
-              if (lobby.hostId === clientId && lobby.players.length > 0) {
-                lobby.hostId = lobby.players[0].id
-              }
-              
-              broadcast(lobbyCode, {
-                type: 'lobby_updated',
-                lobby
-              })
-            }
-            break
-          }
-        }
-        break
+        disconnectedPlayerId = clientId;
+        clients.delete(clientId);
+        break;
       }
     }
-  })
+
+    if (disconnectedPlayerId) {
+      for (const [lobbyCode, lobby] of lobbies.entries()) {
+        const playerIndex = lobby.players.findIndex(p => p.id === disconnectedPlayerId);
+        if (playerIndex !== -1) {
+          lobby.players.splice(playerIndex, 1);
+
+          const game = games.get(lobbyCode);
+          if (game) {
+            const gamePlayerIndex = game.players.findIndex(p => p.id === disconnectedPlayerId);
+            if (gamePlayerIndex > -1) {
+              game.players.splice(gamePlayerIndex, 1);
+            }
+
+            if (game.players.length < 3) {
+              endGame(lobbyCode, 'A player disconnected. Not enough players to continue.');
+            } else {
+              if (game.currentReader === disconnectedPlayerId) {
+                game.currentReader = game.players[gamePlayerIndex % game.players.length].id;
+              }
+              if (resetRound(game)) {
+                broadcast(lobbyCode, { type: 'game_updated', game });
+              } else {
+                broadcast(lobbyCode, { type: 'no_more_sayings' });
+              }
+            }
+          } else {
+            if (lobby.players.length === 0) {
+              lobbies.delete(lobbyCode);
+            } else {
+              if (lobby.hostId === disconnectedPlayerId) {
+                lobby.hostId = lobby.players[0].id;
+              }
+              broadcast(lobbyCode, { type: 'lobby_updated', lobby });
+            }
+          }
+          break;
+        }
+      }
+    }
+  });
 })
 
 function handleMessage(ws, data) {
@@ -433,6 +482,9 @@ function handleMessage(ws, data) {
       break
     case 'lock_round':
       handleLockRound(ws, data)
+      break
+    case 'start_timer':
+      handleStartTimer(ws, data)
       break
     case 'select_answer':
       handleSelectAnswer(ws, data)
@@ -507,6 +559,11 @@ function handleJoinLobby(ws, data) {
     ws.send(JSON.stringify({ type: 'error', message: 'Nickname already taken' }))
     return
   }
+
+  if (lobby.players.some(p => p.emoji === emoji)) {
+    ws.send(JSON.stringify({ type: 'error', message: 'That avatar is already taken' }))
+    return
+  }
   
   const playerId = generateId()
   const player = {
@@ -549,6 +606,10 @@ function handleStartGame(ws, data) {
   }
   
   const game = initializeGame(lobby)
+  if (!game.candidateSaying) {
+    broadcast(lobby.code, { type: 'no_more_sayings' });
+    return;
+  }
   game.candidateSaying = getNextSaying(game)
   game.mode = lobby.mode
   
@@ -795,6 +856,29 @@ function handleLockRound(ws, data) {
   advanceToNextPhase(game)
 }
 
+function handleStartTimer(ws, data) {
+  const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
+  if (!client) return
+
+  const [playerId] = client
+  const game = [...games.values()].find(g => g.currentReader === playerId && g.phase === 'writing')
+
+  if (!game) {
+    ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
+    return
+  }
+
+  game.timer = { endTime: Date.now() + 30000 }
+  broadcast(game.lobbyCode, { type: 'game_updated', game })
+
+  setTimeout(() => {
+    const currentGame = games.get(game.lobbyCode)
+    if (currentGame && currentGame.phase === 'writing') {
+      advanceToNextPhase(currentGame)
+    }
+  }, 30000)
+}
+
 function handleSelectAnswer(ws, data) {
   const { answerId } = data
   const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
@@ -884,7 +968,16 @@ function handleSelectAnswer(ws, data) {
     }, 100)
     
   } else {
-    console.log(`Waiting for more votes: ${game.selections.length}/${nonReaders.length}`)
+    const chooserIndex = game.players.findIndex(p => p.id === game.currentChooser)
+    let nextChooserIndex = (chooserIndex + 1) % game.players.length
+    if (game.players[nextChooserIndex].id === game.currentReader) {
+      nextChooserIndex = (nextChooserIndex + 1) % game.players.length
+    }
+    game.currentChooser = game.players[nextChooserIndex].id
+    broadcast(game.lobbyCode, {
+      type: 'game_updated',
+      game
+    })
   }
 }
 
@@ -921,12 +1014,7 @@ function handleEndGame(ws, data) {
     return
   }
   
-  games.delete(lobby.code)
-  
-  broadcast(lobby.code, {
-    type: 'game_ended',
-    lobby
-  })
+  endGame(lobby.code, 'The host has ended the game.')
 }
 
 // Start the server

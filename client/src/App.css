@@ -33,8 +33,8 @@ body {
   border-radius: 0.75rem; /* rounded-xl */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem; /* p-6 */
-  width: 100%;
-  max-width: 50rem; /* wider format */
+  width: 40rem;
+  max-width: 40rem;
   min-height: 25rem; /* min-h-96 */
   position: relative;
 }
@@ -531,25 +531,18 @@ button:disabled {
 }
 
 .mark-used-btn {
-  background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
-  color: #fff;
-  border: 1px solid #fd7e14;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  padding: 0;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s ease;
-  z-index: 10;
-  line-height: 1.2;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.3px;
-  min-width: 45px;
-  text-align: center;
+  transition: color 0.2s ease;
+  line-height: 1;
 }
 
 .mark-used-btn:hover {
-  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  color: #dc3545;
 }
 
 .first-half {
@@ -634,6 +627,7 @@ button:disabled {
   font-size: 14px;
   color: #495057;
   border-left: 3px solid #198754;
+  word-break: break-word;
 }
 
 .submitted-info {
@@ -686,6 +680,7 @@ button:disabled {
 .answer-text {
   flex: 1;
   color: #495057;
+  word-break: break-word;
 }
 
 .true-badge {
@@ -768,6 +763,7 @@ button:disabled {
   display: block;
   margin: 4px 0;
   color: #6c757d;
+  word-break: break-word;
 }
 
 .correct-badge {
@@ -1123,6 +1119,8 @@ button:disabled {
   font-weight: 600; /* font-semibold */
   color: #0f172a; /* text-slate-900 */
   line-height: 1.5;
+  text-align: center;
+  width: 100%;
 }
 
 .close-btn {
@@ -1212,6 +1210,14 @@ button:disabled {
   margin-bottom: 12px;
   color: #495057;
   font-size: 16px;
+}
+
+.lobby-info-label {
+  text-align: left;
+  font-size: 16px;
+  color: #495057;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .back-btn {
