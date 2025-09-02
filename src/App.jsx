@@ -3,7 +3,7 @@ import './App.css'
 import { SAYINGS } from './phrases.js'
 // Force deploy after GitHub reconnect
 
-const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧝‍♀️', '🧌', '🧞‍♂️', '🧞‍♀️', '🐉']
+const EMOJI_AVATARS = ['🧙‍♂️', '⚔️', '🛡️', '🏰', '👑', '🧝‍♂️', '🧞‍♂️', '🐉', '🧚', '🧜', '🧛', '👽']
 
 function App() {
   const [ws, setWs] = useState(null)
@@ -130,7 +130,8 @@ function App() {
           break
         case 'recycle_notification':
           setShowRecycleNotification(true)
-          setMessage(data.message)
+          // The message is now handled by the dialog itself
+          // setMessage(data.message)
           break
         case 'error':
           setMessage(data.message)
@@ -398,6 +399,22 @@ function App() {
   const RenderDialogs = () => (
     <>
       {/* Global Dialogs that appear on top of any screen */}
+      {showRecycleNotification && (
+        <div className="dialog-overlay">
+          <div className="dialog-box">
+            <div className="dialog-header">
+              <h3>Saying Recycled</h3>
+            </div>
+            <p>Somebody knew the saying already. Returning to saying selection.</p>
+            <div className="dialog-actions">
+              <button onClick={() => {
+                setShowRecycleNotification(false)
+                setMessage('')
+              }} className="primary-btn">Continue</button>
+            </div>
+          </div>
+        </div>
+      )}
       {gameState === 'game' && (
         <>
           {showHomeConfirm && (
@@ -442,17 +459,27 @@ function App() {
                           <div key={p.id} className="score-row">
                             <div className="player-info">
                               <span>{p.emoji} {p.nickname} {p.originalIndex === game.currentReader ? '👑' : ''}</span>
+                            </div>
+                            <div className="score-details">
+                              <span className="score">{p.score}</span>
                               {isHost && !isCurrentPlayer && (
                                 <button 
                                   onClick={() => kickPlayer(p.id)} 
                                   className="kick-btn-small"
                                   title="Kick player"
                                 >
-                                  ✕
+                                  Kick
+                                </button>
+                              )}
+                              {isHost && isCurrentPlayer && (
+                                <button 
+                                  className="you-btn-small"
+                                  disabled
+                                >
+                                  You
                                 </button>
                               )}
                             </div>
-                            <span className="score">{p.score}</span>
                           </div>
                         )
                       })}
@@ -535,23 +562,6 @@ function App() {
                 <div className="dialog-actions">
                   <button onClick={() => setShowRecycleConfirm(false)} className="cancel-btn">Cancel</button>
                   <button onClick={handleRecycleSaying} className="confirm-btn">Recycle</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showRecycleNotification && (
-            <div className="dialog-overlay">
-              <div className="dialog-box">
-                <div className="dialog-header">
-                  <h3>Saying Recycled</h3>
-                </div>
-                <p>Somebody knew the saying already. Returning to saying selection.</p>
-                <div className="dialog-actions">
-                  <button onClick={() => {
-                    setShowRecycleNotification(false)
-                    setMessage('')
-                  }} className="primary-btn">Continue</button>
                 </div>
               </div>
             </div>
@@ -1505,7 +1515,7 @@ function App() {
                         setOnlineSayingOptions([]);
                         send({ type: 'request_sayings' });
                       }}
-                      className="mark-used-btn"
+                      className="recycle-saying-btn"
                       title="Get new sayings"
                     >
                       ×

@@ -598,6 +598,12 @@ function handleJoinLobby(ws, data) {
   clients.set(playerId, { ws, playerId })
   
   const game = games.get(code)
+  if (game) {
+    const gamePlayer = { ...player, score: 0 } // Add player to game with 0 score
+    game.players.push(gamePlayer)
+    broadcast(code, { type: 'game_updated', game })
+  }
+
   ws.send(JSON.stringify({
     type: 'lobby_joined',
     lobby,
@@ -673,10 +679,36 @@ function handleKickPlayer(ws, data) {
   }
   clients.delete(playerId)
   
+  const game = games.get(lobby.code)
+  if (game) {
+    const gamePlayerIndex = game.players.findIndex(p => p.id === playerId)
+    if (gamePlayerIndex > -1) {
+      game.players.splice(gamePlayerIndex, 1)
+    }
+    // If the kicked player was the reader, advance the reader
+    if (game.currentReader === playerId) {
+      game.currentReader = game.players[gamePlayerIndex % game.players.length].id
+    }
+    // If the kicked player was the chooser, advance the chooser
+    if (game.currentChooser === playerId) {
+      const nonReaders = game.players.filter(p => p.id !== game.currentReader)
+      const chooserIndex = nonReaders.findIndex(p => p.id === game.currentChooser)
+      const nextChooserIndex = (chooserIndex + 1) % nonReaders.length
+      game.currentChooser = nonReaders[nextChooserIndex].id
+    }
+  }
+
   broadcast(lobby.code, {
     type: 'lobby_updated',
     lobby
   })
+  
+  if (game) {
+    broadcast(lobby.code, {
+      type: 'game_updated',
+      game
+    })
+  }
 }
 
 function handleLeaveLobby(ws, data) {
@@ -768,12 +800,10 @@ function handleRecycleSaying(ws, data) {
   game.orderedAnswers = []
   game.selections = []
   
-  setTimeout(() => {
-    broadcast(game.lobbyCode, {
-      type: 'game_updated',
-      game
-    })
-  }, 3000) // Show notification for 3 seconds before updating game
+  broadcast(game.lobbyCode, {
+    type: 'game_updated',
+    game
+  })
 }
 
 function handleRequestSayings(ws, data) {
@@ -1053,6 +1083,13 @@ function handleNextRound(ws, data) {
   if (!game || game.winner) {
     ws.send(JSON.stringify({ type: 'error', message: 'Not authorized' }))
     return
+  }
+
+  // Sync players from lobby before starting next round
+  const lobby = lobbies.get(game.lobbyCode)
+  if (lobby) {
+    const oldScores = new Map(game.players.map(p => [p.id, p.score]))
+    game.players = lobby.players.map(p => ({ ...p, score: oldScores.get(p.id) || 0 }))
   }
   
   advanceToNextRound(game)
