@@ -40,7 +40,8 @@
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_lrMI9S/**)",
       "Bash(git restore:*)",
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_43IqGu/**)",
-      "Bash(sudo rm:*)"
+      "Bash(sudo rm:*)",
+      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_vx7Gzo/**)"
     ],
     "deny": [],
     "ask": []
