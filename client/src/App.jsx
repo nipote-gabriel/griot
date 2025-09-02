@@ -7,6 +7,7 @@ const EMOJI_AVATARS = ['🧙‍♂️', '🧙‍♀️', '⚔️', '🛡️', '�
 
 function App() {
   const [ws, setWs] = useState(null)
+  const [connectionStatus, setConnectionStatus] = useState('connecting')
   const [gameState, setGameState] = useState('lobby')
   const [player, setPlayer] = useState(null)
   const [lobby, setLobby] = useState(null)
@@ -42,14 +43,37 @@ function App() {
   }, [gameState])
 
   useEffect(() => {
-    // WebSocket URL - will use environment variable in production or fallback
-    const wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:3001'
+    // WebSocket URL - dynamically determine based on current location
+    const getWebSocketUrl = () => {
+      if (import.meta.env.VITE_WEBSOCKET_URL) {
+        return import.meta.env.VITE_WEBSOCKET_URL
+      }
+      
+      // For production, use wss with current host
+      if (location.protocol === 'https:') {
+        return `wss://${location.host}`
+      }
+      
+      // For local development, check if we're on mobile accessing via IP
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        return `ws://${location.hostname}:3001`
+      }
+      
+      // Default fallback for local development
+      return 'ws://localhost:3001'
+    }
+    
+    const wsUrl = getWebSocketUrl()
+    console.log('Connecting to WebSocket:', wsUrl)
+    setConnectionStatus('connecting')
     const socket = new WebSocket(wsUrl)
     
     socket.onopen = () => {
       console.log('Connected to server')
       setWs(socket)
       wsRef.current = socket
+      setConnectionStatus('connected')
+      setMessage('') // Clear any connection error messages
     }
 
     socket.onmessage = (event) => {
@@ -113,6 +137,7 @@ function App() {
     socket.onclose = () => {
       console.log('Disconnected from server')
       setWs(null)
+      setConnectionStatus('disconnected')
       // Return to home screen if disconnected (e.g., kicked from lobby)
       if (gameStateRef.current !== 'lobby') {
         setGameState('lobby')
@@ -121,6 +146,13 @@ function App() {
         setGame(null)
         setMessage('Connection lost. Returned to home.')
       }
+    }
+
+    socket.onerror = (error) => {
+      console.log('WebSocket error:', error)
+      setConnectionStatus('error')
+      setMessage('Connection failed. Please check your network and try again.')
+      setWs(null)
     }
 
     return () => {
@@ -549,6 +581,19 @@ function App() {
 
               <div className="divider">OR</div>
 
+              {connectionStatus !== 'connected' && (
+                <div className="message" style={{ 
+                  background: connectionStatus === 'connecting' ? '#fff3cd' : '#f8d7da',
+                  color: connectionStatus === 'connecting' ? '#856404' : '#721c24',
+                  border: connectionStatus === 'connecting' ? '1px solid #ffeaa7' : '1px solid #f5c6cb',
+                  marginBottom: '16px'
+                }}>
+                  {connectionStatus === 'connecting' && '🔄 Connecting to server...'}
+                  {connectionStatus === 'error' && '❌ Connection failed. Please check your network.'}
+                  {connectionStatus === 'disconnected' && '📶 Reconnecting...'}
+                </div>
+              )}
+
               <button onClick={createLobby} disabled={!ws} className="primary-btn">
                 Create New Lobby
               </button>
@@ -790,7 +835,7 @@ function App() {
                       className="mark-used-btn"
                       title="Mark this saying as already known"
                     >
-                      🗑️
+                      ×
                     </button>
                     <p className="saying-origin">There is an old {currentSaying.origin || 'ancient'} saying:</p>
                   </div>
@@ -1085,6 +1130,24 @@ function App() {
                   ))}
                 </div>
 
+                {/* Show previous guesses */}
+                {game.selections && game.selections.length > 0 && (
+                  <div className="previous-guesses">
+                    <h4>Previous Votes:</h4>
+                    {game.selections.map((selection, idx) => {
+                      const voter = game.players.find(p => p.id === selection.playerId)
+                      const selectedAnswer = game.orderedAnswers.find(a => a.id === selection.answerId)
+                      const answerIndex = game.orderedAnswers.findIndex(a => a.id === selection.answerId) + 1
+                      return (
+                        <div key={selection.playerId} className="previous-guess">
+                          <span className="voter-info">{voter.emoji} {voter.nickname}</span>
+                          <span className="guess-info">chose #{answerIndex}: "...{selectedAnswer.ending}"</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
                 {showVoteConfirm && selectedAnswer && (
                   <div className="submission-preview">
                     <p><strong>You selected:</strong> "{game.selectedSaying.firstHalf} {selectedAnswer.ending}"</p>
@@ -1365,7 +1428,7 @@ function App() {
                       className="mark-used-btn"
                       title="Get new sayings"
                     >
-                      🗑️
+                      ×
                     </button>
                     <p className="saying-origin">There is an old {onlineSayingOptions[currentOnlineSayingIndex].origin || 'ancient'} saying:</p>
                   </div>
@@ -1404,7 +1467,7 @@ function App() {
                       className="mark-used-btn"
                       title="Mark this saying as already known"
                     >
-                      🗑️
+                      ×
                     </button>
                     <p className="saying-origin">There is an old {game.candidateSaying.origin || 'ancient'} saying:</p>
                   </div>
@@ -1865,6 +1928,24 @@ function App() {
                   )
                 })}
               </div>
+
+              {/* Show previous guesses */}
+              {game.selections && game.selections.length > 0 && (
+                <div className="previous-guesses">
+                  <h4>Previous Votes:</h4>
+                  {game.selections.map((selection, idx) => {
+                    const voter = game.players.find(p => p.id === selection.playerId)
+                    const selectedAnswer = game.orderedAnswers.find(a => a.id === selection.answerId)
+                    const answerIndex = game.orderedAnswers.findIndex(a => a.id === selection.answerId) + 1
+                    return (
+                      <div key={selection.playerId} className="previous-guess">
+                        <span className="voter-info">{voter.emoji} {voter.nickname}</span>
+                        <span className="guess-info">chose #{answerIndex}: "...{selectedAnswer.ending}"</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
               {showVoteConfirm && selectedAnswer && (
                 <div className="submission-preview">

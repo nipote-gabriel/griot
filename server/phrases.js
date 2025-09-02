@@ -1,105 +1,211 @@
-export const SAYINGS = [
-  { "id": 1, "firstHalf": "A feast uncovers", "trueEnding": "a European's wooden leg", "origin": "Oji—West African" },
-  { "id": 2, "firstHalf": "Wood already touched by fire", "trueEnding": "is not hard to set alight", "origin": "African" },
-  { "id": 3, "firstHalf": "Even the lion protects himself", "trueEnding": "against flies", "origin": "African" },
-  { "id": 4, "firstHalf": "A person is a person", "trueEnding": "because of other people", "origin": "South African" },
-  { "id": 5, "firstHalf": "If you think you're too small to make a difference", "trueEnding": "try spending the night with a mosquito", "origin": "African" },
-  { "id": 6, "firstHalf": "A fortune gone to", "trueEnding": "hashed fish", "origin": "Japanese" },
-  { "id": 7, "firstHalf": "The harelip is taken", "trueEnding": "for a dimple", "origin": "Japanese" },
-  { "id": 8, "firstHalf": "Between truth and falsehood, the distance is", "trueEnding": "four fingers", "origin": "Hindustani" },
-  { "id": 9, "firstHalf": "When the winds of change blow, some people build walls", "trueEnding": "and others build windmills", "origin": "Chinese" },
-  { "id": 10, "firstHalf": "A dog bites", "trueEnding": "Lü Dongbin", "origin": "Chinese" },
-  { "id": 11, "firstHalf": "A ground sweat", "trueEnding": "cures all diseases", "origin": "English" },
-  { "id": 12, "firstHalf": "All goeth down", "trueEnding": "Gutter Lane", "origin": "English" },
-  { "id": 13, "firstHalf": "That will happen in the week of", "trueEnding": "four Thursdays", "origin": "Louisiana Creole" },
-  { "id": 14, "firstHalf": "Not my circus", "trueEnding": "not my monkeys", "origin": "Polish" },
-  { "id": 15, "firstHalf": "God gives nuts", "trueEnding": "to the man with no teeth", "origin": "Arabic" },
-  { "id": 16, "firstHalf": "He who pelts another with pebbles", "trueEnding": "asks for rocks in return", "origin": "Nigerian" },
-  { "id": 17, "firstHalf": "Whoever hunts with a cat", "trueEnding": "will be hunted by mice", "origin": "Brazilian" },
-  { "id": 18, "firstHalf": "Shrimp that falls asleep", "trueEnding": "is carried by the current", "origin": "Mexican" },
-  { "id": 19, "firstHalf": "To each chapel", "trueEnding": "its own party", "origin": "Mexican" },
-  { "id": 20, "firstHalf": "Where they love you a lot", "trueEnding": "don't go often", "origin": "Spanish" },
-  { "id": 21, "firstHalf": "A creaking gate", "trueEnding": "hangs the longest", "origin": "English" },
-  { "id": 22, "firstHalf": "The beard will pay", "trueEnding": "for the shaving", "origin": "English" },
-  { "id": 23, "firstHalf": "A loyal heart may be landed", "trueEnding": "under Traitor's bridge", "origin": "English" },
-  { "id": 24, "firstHalf": "Fine words butter", "trueEnding": "no parsnips", "origin": "English" },
-  { "id": 25, "firstHalf": "A new broom", "trueEnding": "sweeps clean", "origin": "English" },
-  { "id": 26, "firstHalf": "The hand is shallow", "trueEnding": "but the throat is deep", "origin": "New Zealand" },
-  { "id": 27, "firstHalf": "A shoe of silver", "trueEnding": "makes iron soft", "origin": "Marathi" },
-  { "id": 28, "firstHalf": "To have tomatoes", "trueEnding": "on your eyes", "origin": "German" },
-  { "id": 29, "firstHalf": "To slide in on", "trueEnding": "a shrimp sandwich", "origin": "Swedish" },
-  { "id": 30, "firstHalf": "To have a wide", "trueEnding": "face", "origin": "Japanese" },
-  { "id": 31, "firstHalf": "To jump from the rooster", "trueEnding": "to the donkey", "origin": "French" },
-  { "id": 32, "firstHalf": "To feed a donkey", "trueEnding": "sponge cake", "origin": "Portuguese" },
-  { "id": 33, "firstHalf": "To let a frog", "trueEnding": "out of your mouth", "origin": "Finnish" },
-  { "id": 34, "firstHalf": "Into the mouth", "trueEnding": "of the wolf", "origin": "Italian" },
-  { "id": 35, "firstHalf": "The one who is not in the dance", "trueEnding": "says the drum is not loud enough", "origin": "Ghanian" },
-  { "id": 36, "firstHalf": "A roaring lion", "trueEnding": "kills no game", "origin": "African" },
-  { "id": 37, "firstHalf": "The moon moves slowly", "trueEnding": "but it crosses the town", "origin": "African" },
-  { "id": 38, "firstHalf": "A single bracelet", "trueEnding": "does not jingle", "origin": "Congolese" },
-  { "id": 39, "firstHalf": "When a needle falls into a deep well", "trueEnding": "many people will look into the well, but few will be willing to go down after it", "origin": "Ethiopian" },
-  { "id": 40, "firstHalf": "A child's fingers", "trueEnding": "are not scalded by a piece of hot yam which his mother puts into his palm", "origin": "Nigerian" },
-  { "id": 41, "firstHalf": "The ruin of a nation", "trueEnding": "begins in the homes of its people", "origin": "Ashanti" },
-  { "id": 42, "firstHalf": "A man who is trampled to death by an elephant", "trueEnding": "is a man who is blind and deaf", "origin": "Kenyan" },
-  { "id": 43, "firstHalf": "The chameleon changes color", "trueEnding": "to match the earth, the earth does not change color to match the chameleon", "origin": "Ghanian" },
-  { "id": 44, "firstHalf": "A wise man who knows proverbs", "trueEnding": "reconciles difficulties", "origin": "Yoruba" },
-  { "id": 45, "firstHalf": "To get lost is to", "trueEnding": "learn the way", "origin": "African" },
-  { "id": 46, "firstHalf": "The best way to eat an elephant", "trueEnding": "is to cut him up into little pieces", "origin": "African" },
-  { "id": 47, "firstHalf": "A restless foot", "trueEnding": "eventually steps on a snake", "origin": "African" },
-  { "id": 48, "firstHalf": "A letter from the heart", "trueEnding": "can be read on the face", "origin": "Kenyan" },
-  { "id": 49, "firstHalf": "If you are building a house and a nail breaks", "trueEnding": "do you stop building or do you change the nail?", "origin": "Rwandan" },
-  { "id": 50, "firstHalf": "A man who pays respect to the great", "trueEnding": "paves his own way for greatness", "origin": "Nigerian" },
-  { "id": 51, "firstHalf": "An army of sheep", "trueEnding": "led by a lion would defeat an army of lions led by a sheep", "origin": "Arabian" },
-  { "id": 52, "firstHalf": "The whisper of a pretty girl", "trueEnding": "can be heard further than the roar of a lion", "origin": "Arabian" },
-  { "id": 53, "firstHalf": "A single stick", "trueEnding": "is easily broken, but a bundle of sticks is not", "origin": "Asian" },
-  { "id": 54, "firstHalf": "The man who moves a mountain", "trueEnding": "begins by carrying away small stones", "origin": "Chinese" },
-  { "id": 55, "firstHalf": "A closed mind", "trueEnding": "is like a closed book; just a block of wood", "origin": "Chinese" },
-  { "id": 56, "firstHalf": "The best time to plant a tree", "trueEnding": "was 20 years ago. The second best time is now", "origin": "Chinese" },
-  { "id": 57, "firstHalf": "A bird does not sing", "trueEnding": "because it has an answer. It sings because it has a song", "origin": "Chinese" },
-  { "id": 58, "firstHalf": "The fish sees the bait", "trueEnding": "not the hook", "origin": "Chinese" },
-  { "id": 59, "firstHalf": "If you want happiness for an hour", "trueEnding": "take a nap. If you want happiness for a day, go fishing. If you want happiness for a year, inherit a fortune. If you want happiness for a lifetime, help somebody", "origin": "Chinese" },
-  { "id": 60, "firstHalf": "To know the road ahead", "trueEnding": "ask those coming back", "origin": "Chinese" },
-  { "id": 61, "firstHalf": "A fall into a ditch", "trueEnding": "makes you wiser", "origin": "Chinese" },
-  { "id": 62, "firstHalf": "The poor man's vineyard", "trueEnding": "is full of words", "origin": "Chilean" },
-  { "id": 63, "firstHalf": "You can't get blood", "trueEnding": "from a turnip", "origin": "English" },
-  { "id": 64, "firstHalf": "The sea is the same", "trueEnding": "everywhere", "origin": "English" },
-  { "id": 65, "firstHalf": "A watched pot", "trueEnding": "never boils", "origin": "English" },
-  { "id": 66, "firstHalf": "If you want to know what a man is like", "trueEnding": "take a good look at how he treats his inferiors, not his equals", "origin": "English" },
-  { "id": 67, "firstHalf": "The hands that help", "trueEnding": "are holier than the lips that pray", "origin": "English" },
-  { "id": 68, "firstHalf": "A smooth sea", "trueEnding": "never made a skilled sailor", "origin": "English" },
-  { "id": 69, "firstHalf": "The darkest hour", "trueEnding": "is just before the dawn", "origin": "English" },
-  { "id": 70, "firstHalf": "When the last tree is cut down, the last fish eaten, and the last stream poisoned", "trueEnding": "you will realize that you cannot eat money", "origin": "Cree" },
-  { "id": 71, "firstHalf": "A healthy man is a successful man", "trueEnding": "even if he is not a king", "origin": "Ethiopian" },
-  { "id": 72, "firstHalf": "The word of a friend", "trueEnding": "makes you cry; the word of an enemy, makes you laugh", "origin": "Ethiopian" },
-  { "id": 73, "firstHalf": "A house without a woman", "trueEnding": "is a house without a foundation", "origin": "Ethiopian" },
-  { "id": 74, "firstHalf": "When the shepherd is angry with his sheep", "trueEnding": "he sends them to a dangerous pasture", "origin": "Ethiopian" },
-  { "id": 75, "firstHalf": "A fool and his water", "trueEnding": "are soon parted", "origin": "Ethiopian" },
-  { "id": 76, "firstHalf": "The dog's kennel", "trueEnding": "is not a place to keep a sausage", "origin": "Finnish" },
-  { "id": 77, "firstHalf": "A summer with a daughter", "trueEnding": "is a summer without a break", "origin": "Finnish" },
-  { "id": 78, "firstHalf": "The one who asks", "trueEnding": "is not a fool", "origin": "Finnish" },
-  { "id": 79, "firstHalf": "Even a small star", "trueEnding": "shines in the darkness", "origin": "Finnish" },
-  { "id": 80, "firstHalf": "It's better to be a coward for a minute", "trueEnding": "than dead for the rest of your life", "origin": "Irish" },
-  { "id": 81, "firstHalf": "A little fire that warms", "trueEnding": "is better than a big fire that burns", "origin": "Irish" },
-  { "id": 82, "firstHalf": "It is in the shelter of each other", "trueEnding": "that the people live", "origin": "Irish" },
-  { "id": 83, "firstHalf": "You'll never plow a field", "trueEnding": "by turning it over in your mind", "origin": "Irish" },
-  { "id": 84, "firstHalf": "A silent mouth", "trueEnding": "is sweet to hear", "origin": "Irish" },
-  { "id": 85, "firstHalf": "A kind word", "trueEnding": "never broke anyone's mouth", "origin": "Irish" },
-  { "id": 86, "firstHalf": "The cat is a good friend", "trueEnding": "but she scratches", "origin": "Italian" },
-  { "id": 87, "firstHalf": "If you have a lot of butter", "trueEnding": "you can put it on your bread", "origin": "Italian" },
-  { "id": 88, "firstHalf": "He who goes to bed without dinner", "trueEnding": "wakes up without credit", "origin": "Italian" },
-  { "id": 89, "firstHalf": "After the rain", "trueEnding": "comes the good weather", "origin": "Italian" },
-  { "id": 90, "firstHalf": "At the end of the game", "trueEnding": "the king and the pawn go into the same box", "origin": "Italian" },
-  { "id": 91, "firstHalf": "The morning has gold", "trueEnding": "in its mouth", "origin": "Italian" },
-  { "id": 92, "firstHalf": "If you don't have a dog", "trueEnding": "you hunt with a cat", "origin": "Italian" },
-  { "id": 93, "firstHalf": "The wolf changes his coat", "trueEnding": "but not his vice", "origin": "Italian" },
-  { "id": 94, "firstHalf": "When the pear is ripe", "trueEnding": "it will fall", "origin": "Italian" },
-  { "id": 95, "firstHalf": "A beautiful frame", "trueEnding": "does not make the picture", "origin": "Italian" },
-  { "id": 96, "firstHalf": "The shrimp that sleeps", "trueEnding": "is carried away by the current", "origin": "Jamaican" },
-  { "id": 97, "firstHalf": "The higher the monkey climbs", "trueEnding": "the more he is exposed", "origin": "Jamaican" },
-  { "id": 98, "firstHalf": "A new broom sweeps clean", "trueEnding": "but the old one knows the corners", "origin": "Jamaican" },
-  { "id": 99, "firstHalf": "The frog's own croak", "trueEnding": "betrays him", "origin": "Jamaican" },
-  { "id": 100, "firstHalf": "If you want to know your friend", "trueEnding": "boil a pot of peas for him", "origin": "Jamaican" }
+// Organize sayings into sets of 5 for better game management
+// Each set can be assigned to a reader, and once used, won't be reused for other readers
+export const SAYING_SETS = [
+  // Set 1: Ethiopian sayings
+  [
+    { id: 1, firstHalf: "When spider webs unite", trueEnding: "they can tie up a lion", origin: "Ethiopian saying" },
+    { id: 2, firstHalf: "The fool speaks", trueEnding: "the wise man listens", origin: "Ethiopian saying" },
+    { id: 3, firstHalf: "A coward sweats", trueEnding: "in water", origin: "Ethiopian saying" },
+    { id: 4, firstHalf: "The hyena with a bone", trueEnding: "does not laugh", origin: "Ethiopian saying" },
+    { id: 5, firstHalf: "When the heart is at peace", trueEnding: "the body is healthy", origin: "Ethiopian saying" },
+  ],
+  
+  // Set 2: Serbian sayings
+  [
+    { id: 6, firstHalf: "The wolf changes his coat", trueEnding: "but not his nature", origin: "Serbian saying" },
+    { id: 7, firstHalf: "God gives nuts", trueEnding: "to those who have no teeth", origin: "Serbian saying" },
+    { id: 8, firstHalf: "The tongue has no bones", trueEnding: "yet it breaks bones", origin: "Serbian saying" },
+    { id: 9, firstHalf: "A guest sees more in an hour", trueEnding: "than the host in a year", origin: "Serbian saying" },
+    { id: 10, firstHalf: "The mountain never meets another mountain", trueEnding: "but people meet people", origin: "Serbian saying" },
+  ],
+  
+  // Set 3: Bantu sayings
+  [
+    { id: 11, firstHalf: "The earthworm does not seek out the chicken", trueEnding: "yet it feeds it", origin: "Bantu saying" },
+    { id: 12, firstHalf: "When the roots of a tree begin to decay", trueEnding: "it spreads death to the branches", origin: "Bantu saying" },
+    { id: 13, firstHalf: "The antelope that has horns", trueEnding: "does not fear the thorn bush", origin: "Bantu saying" },
+    { id: 14, firstHalf: "A tree is best measured", trueEnding: "when it is down", origin: "Bantu saying" },
+    { id: 15, firstHalf: "The child of a snake", trueEnding: "is also a snake", origin: "Bantu saying" },
+  ],
+
+  // Set 4: Finnish sayings
+  [
+    { id: 16, firstHalf: "The forest answers", trueEnding: "as you call to it", origin: "Finnish saying" },
+    { id: 17, firstHalf: "A shared sorrow", trueEnding: "is half a sorrow", origin: "Finnish saying" },
+    { id: 18, firstHalf: "The winter teaches you", trueEnding: "what the summer provides", origin: "Finnish saying" },
+    { id: 19, firstHalf: "Even the bear", trueEnding: "stumbles on a smooth path", origin: "Finnish saying" },
+    { id: 20, firstHalf: "The sauna is the poor man's", trueEnding: "pharmacy", origin: "Finnish saying" },
+  ],
+
+  // Set 5: Mongolian sayings
+  [
+    { id: 21, firstHalf: "A horse with four legs", trueEnding: "still stumbles", origin: "Mongolian saying" },
+    { id: 22, firstHalf: "The wolf that lives with sheep", trueEnding: "learns to bleat", origin: "Mongolian saying" },
+    { id: 23, firstHalf: "When the small fish swims upstream", trueEnding: "it shows the way for the large", origin: "Mongolian saying" },
+    { id: 24, firstHalf: "A yak does not notice", trueEnding: "its own smell", origin: "Mongolian saying" },
+    { id: 25, firstHalf: "The camel never sees", trueEnding: "its own hump", origin: "Mongolian saying" },
+  ],
+
+  // Set 6: Yoruba sayings (Nigeria)
+  [
+    { id: 26, firstHalf: "The lizard that jumped from the high tree", trueEnding: "said he would praise himself if no one else did", origin: "Yoruba saying" },
+    { id: 27, firstHalf: "It is the fear of what tomorrow may bring", trueEnding: "that makes the tortoise carry his house", origin: "Yoruba saying" },
+    { id: 28, firstHalf: "The fly that does not listen", trueEnding: "follows the corpse into the grave", origin: "Yoruba saying" },
+    { id: 29, firstHalf: "When the spider webs join", trueEnding: "they can tie up a lion", origin: "Yoruba saying" },
+    { id: 30, firstHalf: "A bird that flies off the earth", trueEnding: "and lands on an anthill is still on the ground", origin: "Yoruba saying" },
+  ],
+
+  // Set 7: Albanian sayings
+  [
+    { id: 31, firstHalf: "The brave may not live forever", trueEnding: "but the cautious do not live at all", origin: "Albanian saying" },
+    { id: 32, firstHalf: "The mountain teaches silence", trueEnding: "to those who listen", origin: "Albanian saying" },
+    { id: 33, firstHalf: "When the wolf comes to the door", trueEnding: "friendship runs out the window", origin: "Albanian saying" },
+    { id: 34, firstHalf: "The eagle does not catch flies", trueEnding: "but the spider catches eagles", origin: "Albanian saying" },
+    { id: 35, firstHalf: "Blood is thicker than water", trueEnding: "but gold is thicker than blood", origin: "Albanian saying" },
+  ],
+
+  // Set 8: Basque sayings
+  [
+    { id: 36, firstHalf: "The mountain that seems farthest away", trueEnding: "is the one you must climb", origin: "Basque saying" },
+    { id: 37, firstHalf: "A Basque who leaves his valley", trueEnding: "leaves his soul behind", origin: "Basque saying" },
+    { id: 38, firstHalf: "The pelota player who looks at the crowd", trueEnding: "misses the ball", origin: "Basque saying" },
+    { id: 39, firstHalf: "The tree that gives shade", trueEnding: "does not seek the sun for itself", origin: "Basque saying" },
+    { id: 40, firstHalf: "When the north wind blows", trueEnding: "even the stones learn to dance", origin: "Basque saying" },
+  ],
+
+  // Set 9: Hawaiian sayings
+  [
+    { id: 41, firstHalf: "The wave does not return", trueEnding: "to the shore it left", origin: "Hawaiian saying" },
+    { id: 42, firstHalf: "When you paddle your own canoe", trueEnding: "you control the direction", origin: "Hawaiian saying" },
+    { id: 43, firstHalf: "The coconut tree bends", trueEnding: "but does not break in the storm", origin: "Hawaiian saying" },
+    { id: 44, firstHalf: "The reef teaches the wave", trueEnding: "where it cannot go", origin: "Hawaiian saying" },
+    { id: 45, firstHalf: "He who plants taro", trueEnding: "thinks of the future", origin: "Hawaiian saying" },
+  ],
+
+  // Set 10: Inuit sayings
+  [
+    { id: 46, firstHalf: "The seal hole never freezes", trueEnding: "for the patient hunter", origin: "Inuit saying" },
+    { id: 47, firstHalf: "When the aurora dances", trueEnding: "the spirits are playing", origin: "Inuit saying" },
+    { id: 48, firstHalf: "The sled dog that barks at wolves", trueEnding: "remembers its wild cousins", origin: "Inuit saying" },
+    { id: 49, firstHalf: "Ice that looks solid", trueEnding: "may be thin beneath", origin: "Inuit saying" },
+    { id: 50, firstHalf: "The hunter who thinks he knows all", trueEnding: "starves in the plenty", origin: "Inuit saying" },
+  ],
+
+  // Set 11: Swahili sayings
+  [
+    { id: 51, firstHalf: "The lion that breaks the antelope's back", trueEnding: "also breaks its own tooth", origin: "Swahili saying" },
+    { id: 52, firstHalf: "When elephants fight", trueEnding: "the grass suffers", origin: "Swahili saying" },
+    { id: 53, firstHalf: "The tree that would grow to heaven", trueEnding: "must send its roots to hell", origin: "Swahili saying" },
+    { id: 54, firstHalf: "A zebra does not despise", trueEnding: "its stripes", origin: "Swahili saying" },
+    { id: 55, firstHalf: "The antelope says", trueEnding: "wherever you go the earth is one", origin: "Swahili saying" },
+  ],
+
+  // Set 12: Bulgarian sayings
+  [
+    { id: 56, firstHalf: "The wolf is fed", trueEnding: "by its legs", origin: "Bulgarian saying" },
+    { id: 57, firstHalf: "Fear has large eyes", trueEnding: "but sees nothing", origin: "Bulgarian saying" },
+    { id: 58, firstHalf: "The rose's beauty", trueEnding: "is guarded by thorns", origin: "Bulgarian saying" },
+    { id: 59, firstHalf: "When God wants to punish you", trueEnding: "he sends you what you wish for", origin: "Bulgarian saying" },
+    { id: 60, firstHalf: "The nightingale will not sing", trueEnding: "in a cage of gold", origin: "Bulgarian saying" },
+  ],
+
+  // Set 13: Maori sayings (New Zealand)
+  [
+    { id: 61, firstHalf: "The greenstone takes time to form", trueEnding: "but lasts forever", origin: "Maori saying" },
+    { id: 62, firstHalf: "What is man in the presence", trueEnding: "of the mountain", origin: "Maori saying" },
+    { id: 63, firstHalf: "The kumara does not speak", trueEnding: "of its own sweetness", origin: "Maori saying" },
+    { id: 64, firstHalf: "Turn your face to the sun", trueEnding: "and the shadows fall behind you", origin: "Maori saying" },
+    { id: 65, firstHalf: "The shark that swims alone", trueEnding: "dies alone", origin: "Maori saying" },
+  ],
+
+  // Set 14: Tamil sayings (South India)
+  [
+    { id: 66, firstHalf: "The elephant does not feel", trueEnding: "the weight of its own trunk", origin: "Tamil saying" },
+    { id: 67, firstHalf: "When the banyan tree falls", trueEnding: "even the small birds scatter", origin: "Tamil saying" },
+    { id: 68, firstHalf: "The snake that lives in the bamboo", trueEnding: "fears the sound of wind", origin: "Tamil saying" },
+    { id: 69, firstHalf: "Rice tastes sweet", trueEnding: "only to the hungry", origin: "Tamil saying" },
+    { id: 70, firstHalf: "The pearl diver who fears drowning", trueEnding: "will never find treasure", origin: "Tamil saying" },
+  ],
+
+  // Set 15: Tibetan sayings
+  [
+    { id: 71, firstHalf: "The snow lion roars", trueEnding: "but the mountain does not tremble", origin: "Tibetan saying" },
+    { id: 72, firstHalf: "When the prayer flag tears", trueEnding: "the wind carries the prayers", origin: "Tibetan saying" },
+    { id: 73, firstHalf: "The yak that climbs highest", trueEnding: "breathes the thinnest air", origin: "Tibetan saying" },
+    { id: 74, firstHalf: "In the land of snow", trueEnding: "the sun is most precious", origin: "Tibetan saying" },
+    { id: 75, firstHalf: "The monastery bell rings", trueEnding: "whether anyone listens or not", origin: "Tibetan saying" },
+  ],
+
+  // Set 16: Romanian sayings
+  [
+    { id: 76, firstHalf: "The wolf cannot count", trueEnding: "the sheep in the fold", origin: "Romanian saying" },
+    { id: 77, firstHalf: "When the forest burns", trueEnding: "even the wet wood catches fire", origin: "Romanian saying" },
+    { id: 78, firstHalf: "The bear dances", trueEnding: "but the gypsy collects the coins", origin: "Romanian saying" },
+    { id: 79, firstHalf: "God strikes with one hand", trueEnding: "and caresses with the other", origin: "Romanian saying" },
+    { id: 80, firstHalf: "The Danube may freeze", trueEnding: "but it never forgets the sea", origin: "Romanian saying" },
+  ],
+
+  // Set 17: Korean sayings
+  [
+    { id: 81, firstHalf: "Even the tiger", trueEnding: "must sleep", origin: "Korean saying" },
+    { id: 82, firstHalf: "The bamboo that bends in the wind", trueEnding: "does not break", origin: "Korean saying" },
+    { id: 83, firstHalf: "When the crane flies", trueEnding: "ten thousand things become quiet", origin: "Korean saying" },
+    { id: 84, firstHalf: "The mountain is high", trueEnding: "but the king is far away", origin: "Korean saying" },
+    { id: 85, firstHalf: "A frog in a well", trueEnding: "knows nothing of the sea", origin: "Korean saying" },
+  ],
+
+  // Set 18: Zulu sayings
+  [
+    { id: 86, firstHalf: "The elephant does not limp", trueEnding: "when walking on thorns", origin: "Zulu saying" },
+    { id: 87, firstHalf: "When the lion sleeps", trueEnding: "the antelope does not celebrate", origin: "Zulu saying" },
+    { id: 88, firstHalf: "The assegai that kills the lion", trueEnding: "was thrown by a steady hand", origin: "Zulu saying" },
+    { id: 89, firstHalf: "Thunder is not yet rain", trueEnding: "but it promises water", origin: "Zulu saying" },
+    { id: 90, firstHalf: "The chief's dog", trueEnding: "barks at its own shadow", origin: "Zulu saying" },
+  ],
+
+  // Set 19: Lithuanian sayings
+  [
+    { id: 91, firstHalf: "The amber holds", trueEnding: "yesterday's sunlight", origin: "Lithuanian saying" },
+    { id: 92, firstHalf: "When the stork leaves", trueEnding: "winter follows", origin: "Lithuanian saying" },
+    { id: 93, firstHalf: "The forest keeps", trueEnding: "its secrets in the roots", origin: "Lithuanian saying" },
+    { id: 94, firstHalf: "A Lithuanian's heart", trueEnding: "is in his homeland", origin: "Lithuanian saying" },
+    { id: 95, firstHalf: "The oak remembers", trueEnding: "what the birch forgets", origin: "Lithuanian saying" },
+  ],
+
+  // Set 20: Cherokee sayings
+  [
+    { id: 96, firstHalf: "The wolf you feed", trueEnding: "is the one that wins", origin: "Cherokee saying" },
+    { id: 97, firstHalf: "Listen to the wind", trueEnding: "it carries the ancestors' voices", origin: "Cherokee saying" },
+    { id: 98, firstHalf: "The eagle soars above", trueEnding: "but nests on the ground", origin: "Cherokee saying" },
+    { id: 99, firstHalf: "When you were born you cried", trueEnding: "and everyone smiled", origin: "Cherokee saying" },
+    { id: 100, firstHalf: "The earth does not belong to us", trueEnding: "we belong to the earth", origin: "Cherokee saying" },
+  ]
 ];
+
+// Flatten all sets into a single array for compatibility with existing code
+export const SAYINGS = SAYING_SETS.flat();
+
+// Function to get an unused set for a reader
+export function getUnusedSayingSet(usedSetIndices = []) {
+  const availableSetIndices = SAYING_SETS.map((_, index) => index)
+    .filter(index => !usedSetIndices.includes(index));
+  
+  if (availableSetIndices.length === 0) {
+    // All sets used, start over
+    return SAYING_SETS[0];
+  }
+  
+  const randomIndex = Math.floor(Math.random() * availableSetIndices.length);
+  return SAYING_SETS[availableSetIndices[randomIndex]];
+}
+
+// Function to get the set index for a given set
+export function getSayingSetIndex(sayingSet) {
+  return SAYING_SETS.findIndex(set => 
+    set.length === sayingSet.length && 
+    set.every((saying, idx) => saying.id === sayingSet[idx].id)
+  );
+}
 
 export function getRandomSaying(excludeIds = []) {
   // Ensure we have sayings to work with

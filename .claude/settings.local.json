@@ -31,7 +31,11 @@
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_cmoiFp/**)",
       "Bash(npm run build:*)",
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_O9xhhw/**)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:griot-git-main-gabes-projects-ab8ecd28.vercel.app)",
+      "Read(/Users/gabrielnipote/Desktop/**)",
+      "Bash(pkill:*)",
+      "Read(/Users/gabrielnipote/**)"
     ],
     "deny": [],
     "ask": []
