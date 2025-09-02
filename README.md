@@ -1,6 +1,6 @@
-# Griot
+# Soothsayer
 
-A super-minimal, mobile-optimized web app for playing the bluffing party game Griot (inspired by Wise & Otherwise) with friends on their phones.
+A super-minimal, mobile-optimized web app for playing the bluffing party game Soothsayer (inspired by Wise & Otherwise) with friends on their phones.
 
 ## Quick Start
 
