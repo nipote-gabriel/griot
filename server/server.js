@@ -153,7 +153,7 @@ function advanceToNextPhase(game) {
 function endGame(lobbyCode, message) {
   if (games.has(lobbyCode)) {
     games.delete(lobbyCode);
-    broadcast(lobbyCode, { type: 'game_ended', message });
+    broadcast(lobbyCode, { type: 'game_ended', message, lobby: lobbies.get(lobbyCode) });
   }
 }
 

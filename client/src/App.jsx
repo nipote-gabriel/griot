@@ -2035,7 +2035,7 @@ function App() {
             {game.winner ? (
               <div className="game-end">
                 <h2>🎉 {game.winner.emoji} {game.winner.nickname} Wins! 🎉</h2>
-                <button onClick={goBackToHome} className="primary-btn">
+                <button onClick={endGame} className="primary-btn">
                   Return Home
                 </button>
               </div>
