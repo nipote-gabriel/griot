@@ -17,14 +17,7 @@ function App() {
   const [lobbyCode, setLobbyCode] = useState('')
   const [submission, setSubmission] = useState('')
   const [message, setMessage] = useState('')
-  // Set default game mode based on availability
-  const getDefaultGameMode = () => {
-    if (location.hostname.includes('vercel.app') || location.protocol === 'https:') {
-      return 'local' // Only Pass & Play mode available in production
-    }
-    return 'online' // Online mode available in local development
-  }
-  const [gameMode, setGameMode] = useState(getDefaultGameMode()) // 'online' or 'local'
+  const [gameMode, setGameMode] = useState('online') // 'online' or 'local'
   const [localPlayers, setLocalPlayers] = useState([])
   const [currentLocalPlayer, setCurrentLocalPlayer] = useState(0)
   const [sayingOptions, setSayingOptions] = useState([])
@@ -49,32 +42,17 @@ function App() {
     gameStateRef.current = gameState
   }, [gameState])
 
-  // Check if online mode is available (not on production deployment)
-  const isOnlineModeAvailable = () => {
-    // Disable online mode on Vercel or other production deployments
-    if (location.hostname.includes('vercel.app') || location.protocol === 'https:') {
-      return false
-    }
-    // Enable online mode for local development
-    return location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-  }
-
   useEffect(() => {
-    // Don't try to connect to WebSocket if online mode is not available
-    if (!isOnlineModeAvailable()) {
-      setConnectionStatus('disconnected')
-      return
-    }
-
     // WebSocket URL - dynamically determine based on current location
     const getWebSocketUrl = () => {
       if (import.meta.env.VITE_WEBSOCKET_URL) {
         return import.meta.env.VITE_WEBSOCKET_URL
       }
       
-      // For production, use wss with current host
+      // For production deployments, use a dedicated WebSocket server
       if (location.protocol === 'https:') {
-        return `wss://${location.host}`
+        // Use a separate WebSocket server deployed on Render
+        return 'wss://soothsayer-server.onrender.com'
       }
       
       // For local development, check if we're on mobile accessing via IP
@@ -544,14 +522,12 @@ function App() {
           <div className="form-group">
             <label>Game Mode:</label>
             <div className="mode-selector">
-              {isOnlineModeAvailable() && (
-                <button 
-                  className={gameMode === 'online' ? 'selected' : ''}
-                  onClick={() => setGameMode('online')}
-                >
-                  🌐 Online Play
-                </button>
-              )}
+              <button 
+                className={gameMode === 'online' ? 'selected' : ''}
+                onClick={() => setGameMode('online')}
+              >
+                🌐 Online Play
+              </button>
               <button 
                 className={gameMode === 'local' ? 'selected' : ''}
                 onClick={() => setGameMode('local')}

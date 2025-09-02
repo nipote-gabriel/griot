@@ -6,12 +6,22 @@ const PORT = process.env.PORT || 3001
 
 // Create HTTP server
 const server = createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  // Add CORS headers
+  res.writeHead(200, { 
+    'Content-Type': 'text/plain',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  })
   res.end('Soothsayer WebSocket Server is running!')
 })
 
 // Create WebSocket server attached to HTTP server
-const wss = new WebSocketServer({ server })
+const wss = new WebSocketServer({ 
+  server,
+  // Allow connections from any origin
+  verifyClient: () => true
+})
 
 const lobbies = new Map()
 const games = new Map()

@@ -41,7 +41,8 @@
       "Bash(git restore:*)",
       "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_43IqGu/**)",
       "Bash(sudo rm:*)",
-      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_vx7Gzo/**)"
+      "Read(/var/folders/67/w3wzyytx4q77fm55pc3cg7lh0000gn/T/TemporaryItems/NSIRD_screencaptureui_vx7Gzo/**)",
+      "Read(/Users/gabrielnipote/**)"
     ],
     "deny": [],
     "ask": []
