@@ -17,6 +17,7 @@ function App() {
   const [lobbyCode, setLobbyCode] = useState('')
   const [submission, setSubmission] = useState('')
   const [message, setMessage] = useState('')
+  const [isKicked, setIsKicked] = useState(false)
   const [gameMode, setGameMode] = useState('online') // 'online' or 'local'
   const [localPlayers, setLocalPlayers] = useState([])
   const [currentLocalPlayer, setCurrentLocalPlayer] = useState(0)
@@ -31,6 +32,7 @@ function App() {
   const [showHomeConfirm, setShowHomeConfirm] = useState(false)
   const [showInfoDialog, setShowInfoDialog] = useState(false)
   const [showRecycleConfirm, setShowRecycleConfirm] = useState(false)
+  const [showRecycleNotification, setShowRecycleNotification] = useState(false)
   const [onlineSayingOptions, setOnlineSayingOptions] = useState([])
   const [currentOnlineSayingIndex, setCurrentOnlineSayingIndex] = useState(0)
   const [countdown, setCountdown] = useState(null)
@@ -85,14 +87,22 @@ function App() {
         case 'lobby_joined':
           setLobby(data.lobby)
           setPlayer(data.player)
-          setGameState('waiting')
+          // Check if there's an active game
+          if (data.game) {
+            setGame(data.game)
+            setGameState('game')
+            setMessage('You joined mid-game. You will participate in the next round.')
+          } else {
+            setGameState('waiting')
+          }
           setMessage('')
           break
         case 'lobby_updated':
           setLobby(data.lobby)
           // Check if current player was removed from lobby
           if (player && !data.lobby.players.some(p => p.id === player.id)) {
-            // Player was kicked, return to home
+            // Player was kicked, show kicked state
+            setIsKicked(true)
             setGameState('lobby')
             setLobby(null)
             setPlayer(null)
@@ -119,8 +129,8 @@ function App() {
           setGame(data.game)
           break
         case 'recycle_notification':
+          setShowRecycleNotification(true)
           setMessage(data.message)
-          setTimeout(() => setMessage(''), 3000)
           break
         case 'error':
           setMessage(data.message)
@@ -270,11 +280,17 @@ function App() {
   }
 
   const goBackToHome = () => {
+    // If player is in a lobby, send leave message to server first
+    if (lobby && player && ws && ws.readyState === WebSocket.OPEN) {
+      send({ type: 'leave_lobby' })
+    }
+    
     setGameState('lobby')
     setLobby(null)
     setPlayer(null)
     setGame(null)
     setMessage('')
+    setIsKicked(false)
     // Don't close WebSocket - keep connection active for immediate use
   }
 
@@ -389,7 +405,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Leave Game?</h3>
-                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">×</button>
                 </div>
                 <p>Are you sure you want to leave the game and go home? You will be removed from the lobby.</p>
                 <div className="dialog-actions">
@@ -405,7 +421,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Game Info</h3>
-                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">×</button>
                 </div>
                 <div className="info-content">
                   <h4 className="lobby-info-label"><strong>Lobby:</strong> {lobby?.code}</h4>
@@ -419,12 +435,27 @@ function App() {
                         const bDistance = (b.originalIndex - game.currentReader + game.players.length) % game.players.length;
                         return aDistance - bDistance;
                       })
-                      .map(p => (
-                        <div key={p.id} className="score-row">
-                          <span>{p.emoji} {p.nickname} {p.originalIndex === game.currentReader ? '👑' : ''}</span>
-                          <span className="score">{p.score}</span>
-                        </div>
-                      ))}
+                      .map(p => {
+                        const isHost = player?.id === lobby.hostId;
+                        const isCurrentPlayer = p.id === player?.id;
+                        return (
+                          <div key={p.id} className="score-row">
+                            <div className="player-info">
+                              <span>{p.emoji} {p.nickname} {p.originalIndex === game.currentReader ? '👑' : ''}</span>
+                              {isHost && !isCurrentPlayer && (
+                                <button 
+                                  onClick={() => kickPlayer(p.id)} 
+                                  className="kick-btn-small"
+                                  title="Kick player"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                            <span className="score">{p.score}</span>
+                          </div>
+                        )
+                      })}
                   </div>
                 </div>
               </div>
@@ -436,7 +467,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Recycle Saying?</h3>
-                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">×</button>
                 </div>
                 <p>This will notify all players that someone knows this saying and pick a new one. Continue?</p>
                 <div className="dialog-actions">
@@ -457,7 +488,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Leave Game?</h3>
-                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowHomeConfirm(false)} className="close-btn">×</button>
                 </div>
                 <p>Are you sure you want to leave the game and go home?</p>
                 <div className="dialog-actions">
@@ -473,7 +504,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Game Info</h3>
-                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowInfoDialog(false)} className="close-btn">×</button>
                 </div>
                 <div className="info-content">
                   <p><strong>Round:</strong> {game?.round}</p>
@@ -498,7 +529,7 @@ function App() {
               <div className="dialog-box">
                 <div className="dialog-header">
                   <h3>Recycle Saying?</h3>
-                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">✕</button>
+                  <button onClick={() => setShowRecycleConfirm(false)} className="close-btn">×</button>
                 </div>
                 <p>Someone knows this saying already. Pick a new saying?</p>
                 <div className="dialog-actions">
@@ -508,10 +539,45 @@ function App() {
               </div>
             </div>
           )}
+
+          {showRecycleNotification && (
+            <div className="dialog-overlay">
+              <div className="dialog-box">
+                <div className="dialog-header">
+                  <h3>Saying Recycled</h3>
+                </div>
+                <p>Somebody knew the saying already. Returning to saying selection.</p>
+                <div className="dialog-actions">
+                  <button onClick={() => {
+                    setShowRecycleNotification(false)
+                    setMessage('')
+                  }} className="primary-btn">Continue</button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </>
   )
+
+  // Handle kicked player state
+  if (isKicked) {
+    return (
+      <div className="app">
+        <div className="container">
+          <h1>Soothsayer</h1>
+          <div className="kicked-message">
+            <h2>⚠️ You were kicked from the lobby</h2>
+            <p>The host removed you from the game.</p>
+            <button onClick={() => window.location.reload()} className="primary-btn">
+              Tap to Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (gameState === 'lobby') {
     return (
@@ -1353,16 +1419,18 @@ function App() {
               </div>
 
               {game.players.some(p => p.score >= 20) ? (
-                <div className="game-end">
-                  <h2>🎉 {game.players.find(p => p.score >= 20).emoji} {game.players.find(p => p.score >= 20).nickname} Wins! 🎉</h2>
-                  <button onClick={() => {
-                    setGameState('lobby')
-                    setGame(null)
-                    setLocalPlayers([])
-                  }} className="primary-btn">
-                    Return Home
-                  </button>
-                </div>
+                <>
+                  <div className="game-end">
+                    <h2>🎉 {game.players.find(p => p.score >= 20).emoji} {game.players.find(p => p.score >= 20).nickname} Wins! 🎉</h2>
+                  </div>
+                  <div className="return-home-container">
+                    <button onClick={() => {
+                      window.location.reload()
+                    }} className="primary-btn">
+                      Return Home
+                    </button>
+                  </div>
+                </>
               ) : (
                 <div className="next-round">
                   <p>Next Reader: {game.players[(game.currentReader + 1) % game.players.length].emoji} {game.players[(game.currentReader + 1) % game.players.length].nickname}</p>
@@ -2045,12 +2113,16 @@ function App() {
             </div>
 
             {game.winner ? (
-              <div className="game-end">
-                <h2>🎉 {game.winner.emoji} {game.winner.nickname} Wins! 🎉</h2>
-                <button onClick={endGame} className="primary-btn">
-                  Return Home
-                </button>
-              </div>
+              <>
+                <div className="game-end">
+                  <h2>🎉 {game.winner.emoji} {game.winner.nickname} Wins! 🎉</h2>
+                </div>
+                <div className="return-home-container">
+                  <button onClick={() => window.location.reload()} className="primary-btn">
+                    Return Home
+                  </button>
+                </div>
+              </>
             ) : (
               <div className="next-round">
                 <p>Next Reader: {game.nextReader.emoji} {game.nextReader.nickname}</p>

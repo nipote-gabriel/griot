@@ -477,6 +477,9 @@ function handleMessage(ws, data) {
     case 'kick_player':
       handleKickPlayer(ws, data)
       break
+    case 'leave_lobby':
+      handleLeaveLobby(ws, data)
+      break
     case 'next_saying':
       handleNextSaying(ws, data)
       break
@@ -594,10 +597,12 @@ function handleJoinLobby(ws, data) {
   lobby.players.push(player)
   clients.set(playerId, { ws, playerId })
   
+  const game = games.get(code)
   ws.send(JSON.stringify({
     type: 'lobby_joined',
     lobby,
-    player
+    player,
+    game: game || null
   }))
   
   broadcast(code, {
@@ -672,6 +677,42 @@ function handleKickPlayer(ws, data) {
     type: 'lobby_updated',
     lobby
   })
+}
+
+function handleLeaveLobby(ws, data) {
+  const client = [...clients.entries()].find(([id, c]) => c.ws === ws)
+  if (!client) return
+  
+  const [playerId] = client
+  const lobby = [...lobbies.values()].find(l => l.players.some(p => p.id === playerId))
+  
+  if (!lobby) return // Player not in any lobby
+  
+  const playerIndex = lobby.players.findIndex(p => p.id === playerId)
+  if (playerIndex === -1) return
+  
+  // Remove player from lobby
+  lobby.players.splice(playerIndex, 1)
+  
+  // Remove client
+  clients.delete(playerId)
+  
+  // If the lobby is now empty, delete it
+  if (lobby.players.length === 0) {
+    lobbies.delete(lobby.code)
+    games.delete(lobby.code)
+  } else {
+    // If the leaving player was the host, assign a new host
+    if (lobby.hostId === playerId && lobby.players.length > 0) {
+      lobby.hostId = lobby.players[0].id
+    }
+    
+    // Notify remaining players
+    broadcast(lobby.code, {
+      type: 'lobby_updated',
+      lobby
+    })
+  }
 }
 
 function handleNextSaying(ws, data) {

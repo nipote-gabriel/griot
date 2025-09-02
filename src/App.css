@@ -25,6 +25,7 @@ body {
   padding: 20px;
   overflow-x: hidden;
   width: 100%;
+  max-width: 100vw; /* Never exceed viewport width */
   box-sizing: border-box;
 }
 
@@ -36,7 +37,7 @@ body {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding: 1.5rem; /* p-6 */
   width: 100%; /* Let the container be flexible */
-  max-width: 42rem; /* But not too wide on large screens */
+  max-width: 24rem; /* Even smaller max-width for better mobile experience */
   min-width: 320px; /* Minimum width for mobile */
   min-height: 25rem; /* min-h-96 */
   position: relative;
@@ -1170,18 +1171,20 @@ button:disabled {
   background: none;
   border: none;
   color: #64748b; /* text-slate-500 */
-  font-size: 0.75rem;
+  font-size: 0.875rem; /* Match text size */
+  font-weight: bold;
   cursor: pointer;
-  padding: 0;
+  padding: 2px 4px;
   margin: 0;
   min-height: auto;
-  width: 1rem;
-  height: 1rem;
-  display: flex;
+  width: auto;
+  height: auto;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.125rem;
   transition: all 0.15s ease-in-out;
+  line-height: 1;
 }
 
 .close-btn:hover {
@@ -1470,16 +1473,18 @@ button:disabled {
 
 @media (max-width: 480px) {
   .app {
-    padding: 4px;
+    padding: 8px;
     align-items: flex-start;
     width: 100%;
+    margin: 0;
   }
   
   .container {
-    padding: 12px;
+    padding: 16px;
     border-radius: 6px;
     width: 100%;
-    max-width: 100%; /* Use full width */
+    max-width: calc(100vw - 16px); /* Use viewport width minus margins */
+    margin: 0;
     box-sizing: border-box;
   }
   
@@ -1507,4 +1512,69 @@ button:disabled {
     min-height: 32px;
     font-size: 12px;
   }
+}
+
+/* Kicked player message styles */
+.kicked-message {
+  text-align: center;
+  padding: 2rem;
+  background: #fef2f2; /* bg-red-50 */
+  border: 1px solid #fecaca; /* border-red-200 */
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.kicked-message h2 {
+  color: #dc2626; /* text-red-600 */
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.kicked-message p {
+  color: #7f1d1d; /* text-red-900 */
+  margin-bottom: 1.5rem;
+}
+
+.kicked-message .primary-btn {
+  background: #dc2626; /* bg-red-600 */
+}
+
+.kicked-message .primary-btn:hover {
+  background: #b91c1c; /* bg-red-700 */
+}
+
+/* Info dialog player layout */
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kick-btn-small {
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.kick-btn-small:hover {
+  background: #b91c1c;
+  transform: scale(1.1);
+}
+
+.score {
+  font-weight: bold;
+  color: #059669;
 }
