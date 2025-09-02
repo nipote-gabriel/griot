@@ -256,7 +256,12 @@ function App() {
   }
 
   const endGame = () => {
-    send({ type: 'end_game' })
+    if (gameState === 'local-game') {
+      goBackToHome()
+    } else {
+      send({ type: 'end_game' })
+      goBackToHome()
+    }
   }
 
   const kickPlayer = (playerId) => {
@@ -406,10 +411,16 @@ function App() {
                   <div className="players-scores">
                     <h4>Players & Scores:</h4>
                     {game?.players
-                      ?.sort((a, b) => b.score - a.score)
+                      ?.map((p, index) => ({ ...p, originalIndex: index }))
+                      .sort((a, b) => {
+                        // Sort by reader order: current reader first, then next in line
+                        const aDistance = (a.originalIndex - game.currentReader + game.players.length) % game.players.length;
+                        const bDistance = (b.originalIndex - game.currentReader + game.players.length) % game.players.length;
+                        return aDistance - bDistance;
+                      })
                       .map(p => (
                         <div key={p.id} className="score-row">
-                          <span>{p.emoji} {p.nickname}</span>
+                          <span>{p.emoji} {p.nickname} {p.originalIndex === game.currentReader ? '👑' : ''}</span>
                           <span className="score">{p.score}</span>
                         </div>
                       ))}

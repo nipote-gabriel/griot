@@ -1170,12 +1170,17 @@ button:disabled {
   background: none;
   border: none;
   color: #64748b; /* text-slate-500 */
-  font-size: 1.25rem;
+  font-size: 0.75rem;
   cursor: pointer;
-  padding: 0.25rem;
-  margin: -0.25rem;
+  padding: 0;
+  margin: 0;
   min-height: auto;
-  border-radius: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.125rem;
   transition: all 0.15s ease-in-out;
 }
 
